@@ -21,7 +21,7 @@ function Content() {
               role="heading"
               className="text-3xl text-center native:text-5xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl"
             >
-              Expo + Tailwind (NativeWind) Template
+              Expo + Tailwind Template
             </Text>
 
             <Text className="mx-auto max-w-[700px] text-lg text-center md:text-xl">
