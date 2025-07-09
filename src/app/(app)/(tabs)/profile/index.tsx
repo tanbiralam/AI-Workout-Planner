@@ -7,4 +7,3 @@ export default function Page() {
     </SafeAreaView>
   );
 }
-//https://youtu.be/bk89LxdS0TE?t=2618
