@@ -1,6 +1,7 @@
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -25,6 +26,13 @@ export default function Page() {
   const onSignInPress = async () => {
     if (!isLoaded) return;
 
+    if (!emailAddress || !password) {
+      Alert.alert("Error", "Please enter both email and password.");
+      return;
+    }
+
+    setIsLoading(true);
+
     // Start the sign-in process using the email and password provided
     try {
       const signInAttempt = await signIn.create({
@@ -46,6 +54,8 @@ export default function Page() {
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
       console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setIsLoading(false);
     }
   };
 
