@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -10,12 +10,21 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { defineQuery } from "groq";
+import { client } from "@/lib/sanity/client";
+import { Exercise } from "@/lib/sanity/types";
+import ExerciseCard from "@/app/components/ExerciseCard";
+
+export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
+  ...
+}`);
 
 export default function Page() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [exercises, setExercises] = useState([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+
   const [filteredExercises, setFilteredExercises] = useState([]);
 
   const fetchExercises = async () => {
@@ -23,6 +32,7 @@ export default function Page() {
       //data fetching from sanity
 
       const exercises = await client.fetch(exercisesQuery);
+
       setExercises(exercises);
       setFilteredExercises(exercises);
     } catch (error) {
@@ -30,6 +40,17 @@ export default function Page() {
       // You could add error handling here, like showing a toast
     }
   };
+
+  useEffect(() => {
+    fetchExercises();
+  }, []);
+
+  useEffect(() => {
+    const filtered = exercises.filter((exercise: Exercise) =>
+      exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredExercises(filtered);
+  }, [searchQuery, exercises]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -70,7 +91,7 @@ export default function Page() {
 
       {/* Exercise List */}
       <FlatList
-        data={[]}
+        data={filteredExercises}
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 24 }}
