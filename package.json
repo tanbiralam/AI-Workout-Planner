@@ -27,6 +27,7 @@
     "expo-web-browser": "~15.0.7",
     "groq": "^4.2.0",
     "nativewind": "^4.0.1",
+    "openai": "^5.22.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",
