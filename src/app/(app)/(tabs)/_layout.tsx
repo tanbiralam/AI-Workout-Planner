@@ -31,7 +31,7 @@ function Layout() {
           headerShown: false,
           title: "Workout",
           tabBarIcon: ({ size, color }) => (
-            <AntDesign name="pluscircle" size={size} color={color} />
+            <AntDesign name="plus-circle" size={size} color={color} />
           ),
         }}
       />
@@ -52,7 +52,7 @@ function Layout() {
           headerShown: false,
           title: "History",
           tabBarIcon: ({ size, color }) => (
-            <AntDesign name="clockcircle" size={size} color={color} />
+            <AntDesign name="clock-circle" size={size} color={color} />
           ),
         }}
       />
@@ -61,13 +61,14 @@ function Layout() {
         options={{
           headerShown: false,
           title: "Profile",
-          //   tabBarIcon: ({ size, color }) => (
-          //     <Image
-          //       source={user?.imageUrl ?? user?.externalAccounts[0]?.imageUrl}
-          //       className="rounded-full"
-          //       style={{ width: 28, height: 28, borderRadius: 100 }}
-          //     />
-          //   ),
+          tabBarIcon: ({ size, color }) => (
+            // <Image
+            //   source={user?.imageUrl ?? user?.externalAccounts[0]?.imageUrl}
+            //   className="rounded-full"
+            //   style={{ width: 28, height: 28, borderRadius: 100 }}
+            // />
+            <AntDesign name="user" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
