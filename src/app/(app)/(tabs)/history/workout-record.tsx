@@ -41,13 +41,13 @@ const getWorkoutRecordQuery =
 }`);
 
 export default function WorkoutRecord() {
+  const router = useRouter();
   const { workoutId } = useLocalSearchParams();
-  const [loading, setLoading] = useState();
-  const [deleting, setDeleting] = useState();
   const [workout, setWorkout] = useState<GetWorkoutRecordQueryResult | null>(
     null
   );
-  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchWorkout = async () => {
@@ -171,27 +171,26 @@ export default function WorkoutRecord() {
     );
   };
 
-  const deleteWorkout = async() => {
-    if(!workoutId) return;
+  const deleteWorkout = async () => {
+    if (!workoutId) return;
 
-    setDeleting(true)
+    setDeleting(true);
 
     try {
-  await fetch("/api/delete-workout", {
-    method: "POST",
-    body: JSON.stringify({ workoutId }),
-  });
+      await fetch("/api/delete-workout", {
+        method: "POST",
+        body: JSON.stringify({ workoutId }),
+      });
 
-  router.replace("/(app)/(tabs)/history?refresh=true");
-} catch (error) {
-  console.error("Error deleting workout:", error);
-  Alert.alert("Error", "Failed to delete workout. Please try again.", [
-    { text: "OK" },
-  ]);
-} finally {
-  setDeleting(false);
-}
-
+      router.replace("/(app)/(tabs)/history?refresh=true");
+    } catch (error) {
+      console.error("Error deleting workout:", error);
+      Alert.alert("Error", "Failed to delete workout. Please try again.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
