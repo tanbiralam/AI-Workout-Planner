@@ -7,7 +7,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { defineQuery } from "groq";
 import { client } from "@/lib/sanity/client";
 import { GetWorkoutRecordQueryResult } from "@/lib/sanity/types";

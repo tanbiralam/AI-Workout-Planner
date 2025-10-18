@@ -35,17 +35,7 @@ function Layout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="active-workout"
-        options={{
-          title: "Active Workout",
-          href: "null",
-          tabBarStyle: {
-            display: "none",
-          },
-          headerShown: false,
-        }}
-      />
+
       <Tabs.Screen
         name="history"
         options={{
