@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -120,7 +121,8 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-white">
+        <StatusBar barStyle="dark-content" backgroundColor="white" />
         <View className="px-6 py-4 bg-white border-b border-gray-200">
           <Text className="text-2xl font-bold text-gray-900">
             Workout History
