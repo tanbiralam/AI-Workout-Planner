@@ -180,7 +180,7 @@ export default function ActiveWorkout() {
       // Reset the workout
       resetWorkout();
 
-      router.replace("/app/tabs/history?refresh=true");
+      router.replace("/(app)/(tabs)/history?refresh=true");
     }
   };
 
