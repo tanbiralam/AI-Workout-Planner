@@ -33,7 +33,6 @@ export default function ExerciseSelectionModal({
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredExercises, setFilteredExercises] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  // https://youtu.be/bk89LxdS0TE?t=13128
   useEffect(() => {
     if (visible) {
       fetchExercises();
