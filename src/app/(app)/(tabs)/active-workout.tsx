@@ -261,6 +261,15 @@ export default function ActiveWorkout() {
       });
 
       console.log("Workout saved successfully:", result);
+      // Check if the response is successful
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`);
+      }
+
+      const responseData = await result.json();
+      console.log("Workout saved successfully:", responseData);
+
+      return true;
     } catch (error) {
       console.error("Error saving workout:", error);
       Alert.alert("Save Failed", "Failed to save workout. Please try again.");
