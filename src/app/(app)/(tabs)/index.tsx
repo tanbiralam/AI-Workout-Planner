@@ -55,6 +55,7 @@ export default function HomePage() {
       console.error("Error fetching workouts:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
