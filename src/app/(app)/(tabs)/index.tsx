@@ -1,233 +1,192 @@
-import { client } from "@/lib/sanity/client";
-import { GetWorkoutsQueryResult } from "@/lib/sanity/types";
+import React from "react";
+import { useWorkouts } from "@/hooks/useWorkout";
 import { formatDuration } from "@/lib/utils";
+import {
+  calculateStats,
+  formatWorkoutDate,
+  getTotalSets,
+} from "@/lib/workoutUtils";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { Link, useRouter } from "expo-router";
-import { defineQuery } from "groq";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Loader from "@/app/components/Loader";
 
-export const getWorkoutsQuery = defineQuery(`
-  *[_type == "workout" && userId == $userId] | order(date desc) {
-    _id,
-    date,
-    duration,
-    exercises[] {
-      exercise-> {
-        _id,
-        name
-      },
-      sets[] {
-        reps,
-        weight,
-        weightUnit,
-        _type,
-        _key
-      },
-      _type,
-      _key
-    }
-  }
-`);
 export default function HomePage() {
   const { user } = useUser();
   const router = useRouter();
-  const [workouts, setWorkouts] = useState<GetWorkoutsQueryResult>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchWorkouts = async () => {
-    if (!user?.id) return;
+  const { workouts, loading, refreshing, fetchWorkouts, setRefreshing } =
+    useWorkouts(user?.id);
 
-    try {
-      const results = await client.fetch(getWorkoutsQuery, { userId: user.id });
-      setWorkouts(results);
-    } catch (error) {
-      console.error("Error fetching workouts:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchWorkouts();
-  }, [user?.id]);
+  const { totalWorkouts, totalDuration, averageDuration } =
+    calculateStats(workouts);
+  const lastWorkout = workouts[0];
 
   const onRefresh = () => {
     setRefreshing(true);
     fetchWorkouts();
   };
 
-  // Calculate stats
-  const totalWorkouts = workouts.length;
-  const lastWorkout = workouts[0];
-  const totalDuration = workouts.reduce(
-    (sum, workout) => sum + (workout.duration || 0),
-    0
-  );
-  const averageDuration =
-    totalWorkouts > 0 ? Math.round(totalDuration / totalWorkouts) : 0;
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  };
-
-  const getTotalSets = (workout: GetWorkoutsQueryResult[number]) => {
-    return (
-      workout.exercises?.reduce((total, exercise) => {
-        return total + (exercise.sets?.length || 0);
-      }, 0) || 0
-    );
-  };
-
   if (loading) {
-    return (
-      <SafeAreaView className="flex-1 bg-gray-50">
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text className="text-gray-600 mt-4">Loading profile...</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <Loader />;
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#0D0D0D"
+        translucent={false}
+      />
       <ScrollView
         className="flex-1"
+        showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#3b82f6"
+          />
         }
       >
         {/* Header */}
-        <View className="px-6 pt-8 pb-6">
-          <Text className="text-lg text-gray-600">Welcome back,</Text>
-          <Text className="text-3xl font-bold text-gray-900">
-            {user?.firstName || "Athlete"}! 💪
+        <View className="px-5 pt-4 pb-6">
+          <Text className="text-sm text-zinc-500 mb-1">Welcome back,</Text>
+          <Text className="text-3xl font-bold text-white leading-tight">
+            {user?.firstName || "Athlete"}
           </Text>
+          <View className="mt-3 w-12 h-1 bg-blue-500 rounded-full" />
         </View>
 
-        {/* Stats Overview */}
-        <View className="px-6 mb-6">
-          <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">
-              Your Stats
+        {/* Stats Overview Card */}
+        <View className="px-5 mb-5">
+          <View className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800/50">
+            <Text className="text-base font-bold text-white mb-5">
+              Your Progress
             </Text>
 
-            <View className="flex-row justify-between">
-              <View className="items-center flex-1">
-                <Text className="text-2xl font-bold text-blue-600">
-                  {totalWorkouts}
-                </Text>
-                <Text className="text-sm text-gray-600 text-center">
-                  Total{"\n"}Workouts
-                </Text>
+            {/* Primary Stat */}
+            <View className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 mb-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1">
+                  <Text className="text-blue-200 text-xs font-medium uppercase tracking-wide mb-1">
+                    Total Workouts
+                  </Text>
+                  <Text className="text-5xl font-bold text-white">
+                    {totalWorkouts}
+                  </Text>
+                </View>
+                <View className="w-16 h-16 bg-white/10 rounded-2xl items-center justify-center">
+                  <Ionicons name="fitness" size={32} color="white" />
+                </View>
               </View>
+            </View>
 
-              <View className="items-center flex-1">
-                <Text className="text-2xl font-bold text-green-600">
+            {/* Secondary Stats Grid */}
+            <View className="flex-row gap-3">
+              <View className="flex-1 bg-zinc-800/70 rounded-2xl p-4">
+                <View className="w-9 h-9 bg-green-500/15 rounded-xl items-center justify-center mb-3">
+                  <Ionicons name="timer-outline" size={18} color="#22c55e" />
+                </View>
+                <Text className="text-zinc-500 text-xs mb-1">Total Time</Text>
+                <Text className="text-xl font-bold text-white">
                   {formatDuration(totalDuration)}
                 </Text>
-                <Text className="text-sm text-gray-600 text-center">
-                  Total{"\n"}Time
-                </Text>
               </View>
 
-              <View className="items-center flex-1">
-                <Text className="text-2xl font-bold text-purple-600">
+              <View className="flex-1 bg-zinc-800/70 rounded-2xl p-4">
+                <View className="w-9 h-9 bg-purple-500/15 rounded-xl items-center justify-center mb-3">
+                  <Ionicons name="trending-up" size={18} color="#a855f7" />
+                </View>
+                <Text className="text-zinc-500 text-xs mb-1">Average</Text>
+                <Text className="text-xl font-bold text-white">
                   {averageDuration > 0 ? formatDuration(averageDuration) : "0m"}
-                </Text>
-                <Text className="text-sm text-gray-600 text-center">
-                  Average{"\n"}Duration
                 </Text>
               </View>
             </View>
           </View>
         </View>
 
-        {/* Quick Action */}
-        <View className="px-6 mb-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
+        {/* Start Workout Button */}
+        <View className="px-5 mb-5">
+          <TouchableOpacity
+            onPress={() => router.push("/workout")}
+            className="bg-blue-600 rounded-3xl shadow-lg shadow-blue-500/25"
+            activeOpacity={0.85}
+            style={{ elevation: 8 }}
+          >
+            <View className="px-6 py-5">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center flex-1">
+                  <View className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center mr-4">
+                    <Ionicons name="play" size={22} color="white" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white text-xl font-bold">
+                      Start Workout
+                    </Text>
+                    <Text className="text-blue-100 text-sm mt-0.5">
+                      Begin training session
+                    </Text>
+                  </View>
+                </View>
+                <View className="w-9 h-9 bg-white/20 rounded-full items-center justify-center">
+                  <Ionicons name="chevron-forward" size={20} color="white" />
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Quick Actions */}
+        <View className="px-5 mb-5">
+          <Text className="text-base font-bold text-white mb-3">
             Quick Actions
           </Text>
 
-          {/* Start Workout Button */}
-          <TouchableOpacity
-            onPress={() => router.push("/workout")}
-            className="bg-blue-600 rounded-2xl p-6 mb-4 shadow-sm"
-            activeOpacity={0.8}
-          >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center flex-1">
-                <View className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center mr-4">
-                  <Ionicons name="play" size={24} color="white" />
-                </View>
-                <View>
-                  <Text className="text-white text-xl font-semibold">
-                    Start Workout
-                  </Text>
-                  <Text className="text-blue-100">
-                    Begin your training session
-                  </Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={24} color="white" />
-            </View>
-          </TouchableOpacity>
-
-          {/* Action Grid */}
-          <View className="flex-row gap-4">
+          <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={() => router.push("/history")}
-              className="bg-white rounded-2xl p-4 flex-1 shadow-sm border border-gray-100"
+              className="flex-1 bg-zinc-900 rounded-2xl border border-zinc-800/50"
               activeOpacity={0.7}
             >
-              <View className="items-center">
-                <View className="w-12 h-12 bg-gray-100 rounded-full items-center justify-center mb-3">
-                  <Ionicons name="time-outline" size={24} color="#6B7280" />
+              <View className="p-5 items-center">
+                <View className="w-14 h-14 bg-zinc-800/80 rounded-2xl items-center justify-center mb-3">
+                  <Ionicons name="time-outline" size={26} color="#71717a" />
                 </View>
-                <Text className="text-gray-900 font-medium text-center">
-                  Workout{"\n"}History
+                <Text className="text-white font-semibold text-sm">
+                  History
+                </Text>
+                <Text className="text-zinc-500 text-xs mt-1">
+                  Past workouts
                 </Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => router.push("/exercises")}
-              className="bg-white rounded-2xl p-4 flex-1 shadow-sm border border-gray-100"
+              className="flex-1 bg-zinc-900 rounded-2xl border border-zinc-800/50"
               activeOpacity={0.7}
             >
-              <View className="items-center">
-                <View className="w-12 h-12 bg-gray-100 rounded-full items-center justify-center mb-3">
-                  <Ionicons name="barbell-outline" size={24} color="#6B7280" />
+              <View className="p-5 items-center">
+                <View className="w-14 h-14 bg-zinc-800/80 rounded-2xl items-center justify-center mb-3">
+                  <Ionicons name="barbell-outline" size={26} color="#71717a" />
                 </View>
-                <Text className="text-gray-900 font-medium text-center">
-                  Browse{"\n"}Exercises
+                <Text className="text-white font-semibold text-sm">
+                  Exercises
+                </Text>
+                <Text className="text-zinc-500 text-xs mt-1">
+                  Browse library
                 </Text>
               </View>
             </TouchableOpacity>
@@ -236,13 +195,13 @@ export default function HomePage() {
 
         {/* Last Workout */}
         {lastWorkout && (
-          <View className="px-6 mb-8">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">
-              Last Workout
+          <View className="px-5 mb-6">
+            <Text className="text-base font-bold text-white mb-3">
+              Recent Activity
             </Text>
 
             <TouchableOpacity
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+              className="bg-zinc-900 rounded-2xl border border-zinc-800/50"
               onPress={() => {
                 router.push({
                   pathname: "/history/workout-record",
@@ -251,64 +210,86 @@ export default function HomePage() {
               }}
               activeOpacity={0.7}
             >
-              <View className="flex-row items-center justify-between mb-4">
-                <View>
-                  <Text className="text-lg font-semibold text-gray-900">
-                    {formatDate(lastWorkout.date || "")}
-                  </Text>
-                  <View className="flex-row items-center mt-1">
-                    <Ionicons name="time-outline" size={16} color="#6B7280" />
-                    <Text className="text-gray-600 ml-2">
-                      {lastWorkout.duration
-                        ? formatDuration(lastWorkout.duration)
-                        : "Duration not recorded"}
+              <View className="p-5">
+                <View className="flex-row items-start justify-between mb-4">
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-2">
+                      <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                      <Text className="text-xs text-zinc-500 font-medium">
+                        {formatWorkoutDate(lastWorkout.date || "")}
+                      </Text>
+                    </View>
+                    <Text className="text-lg font-bold text-white mb-1">
+                      Last Workout
                     </Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="time-outline" size={13} color="#3b82f6" />
+                      <Text className="text-sm text-zinc-400 ml-1.5">
+                        {lastWorkout.duration
+                          ? formatDuration(lastWorkout.duration)
+                          : "Duration not recorded"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="w-14 h-14 bg-blue-500/15 rounded-2xl items-center justify-center">
+                    <Ionicons
+                      name="fitness-outline"
+                      size={26}
+                      color="#3b82f6"
+                    />
                   </View>
                 </View>
 
-                <View className="bg-blue-100 rounded-full w-12 h-12 items-center justify-center">
-                  <Ionicons name="fitness-outline" size={24} color="#3B82F6" />
+                <View className="flex-row items-center justify-between pt-4 border-t border-zinc-800/70">
+                  <Text className="text-zinc-400 text-xs">
+                    {lastWorkout.exercises?.length || 0} exercises •{" "}
+                    {getTotalSets(lastWorkout)} sets
+                  </Text>
+                  <View className="w-7 h-7 bg-zinc-800/70 rounded-full items-center justify-center">
+                    <Ionicons
+                      name="chevron-forward"
+                      size={14}
+                      color="#71717a"
+                    />
+                  </View>
                 </View>
-              </View>
-
-              <View className="flex-row items-center justify-between">
-                <Text className="text-gray-600">
-                  {lastWorkout.exercises?.length || 0} exercises •{" "}
-                  {getTotalSets(lastWorkout)} sets
-                </Text>
-                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
               </View>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Empty State for No Workouts */}
+        {/* Empty State */}
         {totalWorkouts === 0 && (
-          <View className="px-6 mb-8">
-            <View className="bg-white rounded-2xl p-8 items-center shadow-sm border border-gray-100">
-              <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center mb-4">
-                <Ionicons name="barbell-outline" size={32} color="#3B82F6" />
+          <View className="px-5 mb-6">
+            <View className="bg-zinc-900 rounded-3xl p-8 items-center border border-zinc-800/50">
+              <View className="w-20 h-20 bg-blue-500/15 rounded-3xl items-center justify-center mb-5">
+                <Ionicons name="barbell-outline" size={40} color="#3b82f6" />
               </View>
 
-              <Text className="text-xl font-semibold text-gray-900 mb-2">
-                Ready to start your fitness journey?
+              <Text className="text-2xl font-bold text-white mb-2 text-center">
+                Ready to Begin?
               </Text>
-              <Text className="text-gray-600 text-center mb-4">
-                Track your workouts and see your progress over time
+              <Text className="text-zinc-400 text-center mb-6 text-sm leading-relaxed px-2">
+                Start tracking your workouts and watch your progress grow over
+                time
               </Text>
 
               <TouchableOpacity
                 onPress={() => router.push("/workout")}
-                className="bg-blue-600 rounded-xl px-6 py-3"
-                activeOpacity={0.8}
+                className="bg-blue-600 rounded-2xl px-8 py-4"
+                activeOpacity={0.85}
               >
-                <Text className="text-white font-semibold">
-                  Start Your First Workout
+                <Text className="text-white font-bold text-base">
+                  Start First Workout
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
+
+        {/* Bottom Spacing */}
+        <View className="h-6" />
       </ScrollView>
     </SafeAreaView>
   );

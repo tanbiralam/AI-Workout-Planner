@@ -1,0 +1,78 @@
+import { GetWorkoutsQueryResult } from "@/lib/sanity/types";
+import { formatDuration } from "@/lib/utils";
+
+/**
+ * Calculates total workouts, total duration, and average duration
+ * exactly as used in the HomePage component.
+ */
+export function calculateStats(workouts: GetWorkoutsQueryResult) {
+  const totalWorkouts = workouts.length;
+  const totalDuration = workouts.reduce(
+    (sum, workout) => sum + (workout.duration || 0),
+    0
+  );
+  const averageDuration =
+    totalWorkouts > 0 ? Math.round(totalDuration / totalWorkouts) : 0;
+
+  return {
+    totalWorkouts,
+    totalDuration,
+    averageDuration,
+  };
+}
+
+/**
+ * Returns the total number of sets in a given workout.
+ */
+export function getTotalSets(workout: GetWorkoutsQueryResult[number]) {
+  return (
+    workout.exercises?.reduce((total, exercise) => {
+      return total + (exercise.sets?.length || 0);
+    }, 0) || 0
+  );
+}
+
+/**
+ * Formats a workout date to "Today", "Yesterday", or "Wed, Mar 5" style.
+ */
+export function formatWorkoutDate(dateString?: string): string {
+  if (!dateString) return "Unknown date";
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) {
+    return "Today";
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
+  } else {
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  }
+}
+
+/**
+ * Combines all workout summary info for debugging or future expansion.
+ */
+export function getWorkoutSummary(workouts: GetWorkoutsQueryResult) {
+  const { totalWorkouts, totalDuration, averageDuration } =
+    calculateStats(workouts);
+
+  const lastWorkout = workouts[0];
+  const totalSets = lastWorkout ? getTotalSets(lastWorkout) : 0;
+  const lastWorkoutDate = lastWorkout
+    ? formatWorkoutDate(lastWorkout.date)
+    : null;
+
+  return {
+    totalWorkouts,
+    totalDuration: formatDuration(totalDuration),
+    averageDuration: formatDuration(averageDuration),
+    lastWorkoutDate,
+    totalSets,
+  };
+}
