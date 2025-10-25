@@ -1,69 +1,48 @@
-import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
-import { Exercise } from "@/lib/sanity/types";
-import { urlFor } from "@/lib/sanity/client";
+import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { getDifficultyColor, getDifficultyText } from "@/lib/utils";
+import { WorkoutExercise } from "@/store/workout-store";
 
 interface ExerciseCardProps {
-  item: Exercise;
+  exercise: WorkoutExercise;
   onPress: () => void;
-  showChevron?: boolean;
+  onDelete: () => void;
 }
 
 export default function ExerciseCard({
-  item,
-  showChevron,
+  exercise,
   onPress,
+  onDelete,
 }: ExerciseCardProps) {
   return (
     <TouchableOpacity
-      className="bg-white rounded-2xl mb-4 shadow-sm border border-gray-100"
       onPress={onPress}
+      className="bg-zinc-900 rounded-2xl p-4 mb-3 border border-zinc-800/50"
+      activeOpacity={0.7}
     >
-      <View className="flex-row p-6">
-        <View className="w-20 h-20 bg-white rounded-xl mr-4 overflow-hidden">
-          {item.image ? (
-            <Image
-              source={{ uri: urlFor(item.image?.asset?._ref).url() }}
-              className="w-full h-full"
-              resizeMode="contain"
-            />
-          ) : (
-            <View className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 items-center justify-center">
-              <Ionicons name="fitness" size={24} color="white" />
-            </View>
-          )}
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1">
+          <View className="flex-row items-center mb-2">
+            <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
+            <Text className="text-xs text-zinc-500 font-medium">Exercise</Text>
+          </View>
+          <Text className="text-lg font-bold text-white mb-1">
+            {exercise.name}
+          </Text>
+          <Text className="text-sm text-zinc-400">
+            {exercise.sets.length} sets •{" "}
+            {exercise.sets.filter((set) => set.isCompleted).length} completed
+          </Text>
         </View>
 
-        <View className="flex-1 justify-between">
-          <View>
-            <Text className="text-lg font-bold text-gray-900 mb-1">
-              {item.name}
-            </Text>
-            <Text className="text-sm text-gray-600 mb-2" numberOfLines={2}>
-              {item.description || "No Description available"}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center justify-between">
-            <View
-              className={`px-3 py-1 rounded-full ${getDifficultyColor(
-                item.difficulty
-              )}`}
-            >
-              <Text className="text-xs font-semibold text-white">
-                {getDifficultyText(item.difficulty)}
-              </Text>
-            </View>
-
-            {showChevron && (
-              <TouchableOpacity className="p-2">
-                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+        {/* Delete Exercise Button */}
+        <TouchableOpacity
+          onPress={onDelete}
+          className="w-10 h-10 rounded-xl items-center justify-center bg-red-500/10 border border-red-500/30 ml-3"
+          activeOpacity={0.7}
+        >
+          <Ionicons name="trash-outline" size={16} color="#ef4444" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );

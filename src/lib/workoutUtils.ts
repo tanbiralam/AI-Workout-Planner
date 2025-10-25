@@ -56,6 +56,25 @@ export function formatWorkoutDate(dateString?: string): string {
 }
 
 /**
+ * Formats workout duration from stopwatch values (hours, minutes, seconds)
+ * Shows HH:MM:SS format for workouts over 1 hour, MM:SS otherwise
+ */
+export function getWorkoutDuration(
+  hours: number,
+  minutes: number,
+  seconds: number
+): string {
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  }
+  return `${minutes.toString().padStart(2, "0")}:${seconds
+    .toString()
+    .padStart(2, "0")}`;
+}
+
+/**
  * Combines all workout summary info for debugging or future expansion.
  */
 export function getWorkoutSummary(workouts: GetWorkoutsQueryResult) {
