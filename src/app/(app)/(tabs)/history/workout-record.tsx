@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  StatusBar,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -12,6 +13,7 @@ import { defineQuery } from "groq";
 import { client } from "@/lib/sanity/client";
 import { GetWorkoutRecordQueryResult } from "@/lib/sanity/types";
 import { formatDuration } from "@/lib/utils";
+import { getTotalSets } from "@/lib/workoutUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -94,12 +96,9 @@ export default function WorkoutRecord() {
     return formatDuration(seconds);
   };
 
-  const getTotalSets = () => {
-    return (
-      workout?.exercises?.reduce((total, exercise) => {
-        return total + (exercise.sets?.length || 0);
-      }, 0) || 0
-    );
+  const getTotalSetsCount = () => {
+    if (!workout) return 0;
+    return getTotalSets(workout);
   };
 
   const getTotalVolume = () => {
@@ -120,10 +119,20 @@ export default function WorkoutRecord() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="#0D0D0D"
+          translucent={false}
+        />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text className="text-gray-600 mt-4">Loading your workouts...</Text>
+          <View className="w-20 h-20 bg-blue-500/20 rounded-3xl items-center justify-center mb-6">
+            <ActivityIndicator size="large" color="#3b82f6" />
+          </View>
+          <Text className="text-zinc-400 text-lg font-semibold">
+            Loading Workout
+          </Text>
+          <Text className="text-zinc-500 text-sm mt-2">Please wait...</Text>
         </View>
       </SafeAreaView>
     );
@@ -131,20 +140,28 @@ export default function WorkoutRecord() {
 
   if (!workout) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
-        <View className="flex-1 items-center justify-center">
-          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-          <Text className="text-xl font-semibold text-gray-900 mt-4">
+      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="#0D0D0D"
+          translucent={false}
+        />
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="w-20 h-20 bg-red-500/20 rounded-3xl items-center justify-center mb-6">
+            <Ionicons name="alert-circle-outline" size={40} color="#ef4444" />
+          </View>
+          <Text className="text-2xl font-bold text-white mb-2 text-center">
             Workout Not Found
           </Text>
-          <Text className="text-gray-600 text-center mt-2">
-            This workout record could not be found.
+          <Text className="text-zinc-400 text-center mb-6 text-sm leading-relaxed">
+            This workout record could not be found or may have been deleted.
           </Text>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="bg-blue-600 px-6 py-3 rounded-lg mt-6"
+            className="bg-blue-600 rounded-2xl px-8 py-4"
+            activeOpacity={0.85}
           >
-            <Text className="text-white font-medium">Go Back</Text>
+            <Text className="text-white font-bold text-base">Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -194,142 +211,220 @@ export default function WorkoutRecord() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <ScrollView className="flex-1">
-        {/* Workout Summary */}
-        <View className="bg-white p-6 border-b border-gray-300">
+    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#0D0D0D"
+        translucent={false}
+      />
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View className="px-5 pt-4 pb-6">
           <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-lg font-semibold text-gray-900">
-              Workout Summary
-            </Text>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-10 h-10 bg-zinc-800/50 rounded-full items-center justify-center"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="arrow-back" size={20} color="#71717a" />
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={handleDeleteWorkout}
               disabled={deleting}
-              className="bg-red-600 px-4 py-2 rounded-lg flex-row items-center"
+              className="bg-red-600/10 px-4 py-2 rounded-xl border border-red-600/30 flex-row items-center"
+              activeOpacity={0.85}
             >
               {deleting ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color="#ef4444" />
               ) : (
                 <>
-                  <Ionicons name="trash-outline" size={16} color="#FFFFFF" />
-                  <Text className="text-white font-medium ml-2">Delete</Text>
+                  <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                  <Text className="text-red-400 font-medium ml-2">Delete</Text>
                 </>
               )}
             </TouchableOpacity>
           </View>
+          <Text className="text-3xl font-bold text-white leading-tight">
+            Workout Details
+          </Text>
+          <Text className="text-sm text-zinc-500 mt-1">
+            {formatDate(workout.date)} at {formatTime(workout.date)}
+          </Text>
+          <View className="mt-3 w-12 h-1 bg-blue-500 rounded-full" />
+        </View>
 
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="time-outline" size={20} color="#6B7280" />
-            <Text className="text-gray-700 ml-3 font-medium">
-              {formatWorkoutDuration(workout.duration)}
+        {/* Workout Summary */}
+        <View className="px-5 mb-5">
+          <View className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800/50">
+            <Text className="text-base font-bold text-white mb-5">
+              Workout Summary
             </Text>
-          </View>
 
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="fitness-outline" size={20} color="#6B7280" />
-            <Text className="text-gray-700 ml-3 font-medium">
-              {workout.exercises?.length || 0} exercises
-            </Text>
-          </View>
+            {/* Primary Stats Grid */}
+            <View className="flex-row gap-3 mb-3">
+              <View className="flex-1 bg-zinc-800/70 rounded-2xl p-4">
+                <View className="w-9 h-9 bg-blue-500/15 rounded-xl items-center justify-center mb-3">
+                  <Ionicons name="timer-outline" size={18} color="#3b82f6" />
+                </View>
+                <Text className="text-2xl font-bold text-white mb-1">
+                  {formatWorkoutDuration(workout.duration)}
+                </Text>
+                <Text className="text-xs text-zinc-500">Duration</Text>
+              </View>
 
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="bar-chart-outline" size={20} color="#6B7280" />
-            <Text className="text-gray-700 ml-3 font-medium">
-              {getTotalSets()} total sets
-            </Text>
-          </View>
+              <View className="flex-1 bg-zinc-800/70 rounded-2xl p-4">
+                <View className="w-9 h-9 bg-green-500/15 rounded-xl items-center justify-center mb-3">
+                  <Ionicons name="fitness" size={18} color="#22c55e" />
+                </View>
+                <Text className="text-2xl font-bold text-white mb-1">
+                  {workout.exercises?.length || 0}
+                </Text>
+                <Text className="text-xs text-zinc-500">Exercises</Text>
+              </View>
 
-          {volume > 0 && (
-            <View className="flex-row items-center">
-              <Ionicons name="barbell-outline" size={20} color="#6B7280" />
-              <Text className="text-gray-700 ml-3 font-medium">
-                {volume.toLocaleString()} {unit} total volume
-              </Text>
+              <View className="flex-1 bg-zinc-800/70 rounded-2xl p-4">
+                <View className="w-9 h-9 bg-purple-500/15 rounded-xl items-center justify-center mb-3">
+                  <Ionicons
+                    name="bar-chart-outline"
+                    size={18}
+                    color="#a855f7"
+                  />
+                </View>
+                <Text className="text-2xl font-bold text-white mb-1">
+                  {getTotalSetsCount()}
+                </Text>
+                <Text className="text-xs text-zinc-500">Total Sets</Text>
+              </View>
             </View>
-          )}
+
+            {/* Volume Summary */}
+            {volume > 0 && (
+              <View className="bg-zinc-800/50 rounded-2xl p-4 border border-zinc-700/30">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center">
+                    <View className="w-8 h-8 bg-orange-500/15 rounded-lg items-center justify-center mr-3">
+                      <Ionicons
+                        name="barbell-outline"
+                        size={16}
+                        color="#f97316"
+                      />
+                    </View>
+                    <Text className="text-sm text-zinc-400">Total Volume</Text>
+                  </View>
+                  <Text className="text-lg font-bold text-white">
+                    {volume.toLocaleString()} {unit}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Exercise List */}
-
-        <View className="space-y-4 p-6 gap-4">
-          {workout.exercises?.map((exerciseData, index) => (
-            <View
-              key={exerciseData._key}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
-            >
-              {/* Exercise Header */}
-              <View className="flex-row items-center justify-between mb-4">
-                <View className="flex-1">
-                  <Text className="text-lg font-bold text-gray-900">
-                    {exerciseData.exercise?.name || "Unknown Exercise"}
-                  </Text>
-                  <Text className="text-gray-600 text-sm mt-1">
-                    {exerciseData.sets?.length || 0} sets completed
-                  </Text>
-                </View>
-                <View className="bg-blue-100 rounded-full w-10 h-10 items-center justify-center">
-                  <Text className="text-blue-600 font-bold">{index + 1}</Text>
-                </View>
-              </View>
-
-              {/* Sets */}
-              <View className="space-y-2">
-                <Text className="text-sm font-medium text-gray-700 mb-2">
-                  Sets:
-                </Text>
-                {exerciseData.sets?.map((set, setIndex) => (
-                  <View
-                    key={set._key}
-                    className="bg-gray-50 rounded-lg p-3 flex-row items-center justify-between"
-                  >
-                    <View className="flex-row items-center">
-                      <View className="bg-gray-200 rounded-full w-6 h-6 items-center justify-center mr-3">
-                        <Text className="text-gray-700 text-xs font-medium">
-                          {setIndex + 1}
-                        </Text>
-                      </View>
-                      <Text className="text-gray-900 font-medium">
-                        {set.reps} reps
+        <View className="px-5 mb-6">
+          <Text className="text-base font-bold text-white mb-3">
+            Exercise Details
+          </Text>
+          <View className="space-y-4 gap-4">
+            {workout.exercises?.map((exerciseData, index) => (
+              <View
+                key={exerciseData._key}
+                className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800/50"
+              >
+                {/* Exercise Header */}
+                <View className="flex-row items-center justify-between mb-4">
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-2">
+                      <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
+                      <Text className="text-xs text-zinc-500 font-medium">
+                        Exercise {index + 1}
                       </Text>
                     </View>
-
-                    {set.weight && (
-                      <View className="flex-row items-center">
-                        <Ionicons
-                          name="barbell-outline"
-                          size={16}
-                          color="#6B7280"
-                        />
-                        <Text className="text-gray-700 ml-2 font-medium">
-                          {set.weight} {set.weightUnit || "lbs"}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                ))}
-              </View>
-
-              {/* Exercise Volume Summary */}
-              {exerciseData.sets && exerciseData.sets.length > 0 && (
-                <View className="mt-4 pt-4 border-t border-gray-100">
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-sm text-gray-600">
-                      Exercise Volume:
+                    <Text className="text-lg font-bold text-white mb-1">
+                      {exerciseData.exercise?.name || "Unknown Exercise"}
                     </Text>
-                    <Text className="text-sm font-medium text-gray-900">
-                      {exerciseData.sets
-                        .reduce((total, set) => {
-                          return total + (set.weight || 0) * (set.reps || 0);
-                        }, 0)
-                        .toLocaleString()}{" "}
-                      {exerciseData.sets[0]?.weightUnit || "lbs"}
+                    <Text className="text-sm text-zinc-400">
+                      {exerciseData.sets?.length || 0} sets completed
+                    </Text>
+                  </View>
+                  <View className="w-12 h-12 bg-blue-500/15 rounded-2xl items-center justify-center">
+                    <Text className="text-blue-400 font-bold text-lg">
+                      {index + 1}
                     </Text>
                   </View>
                 </View>
-              )}
-            </View>
-          ))}
+
+                {/* Sets */}
+                <View className="space-y-2">
+                  <Text className="text-sm font-medium text-zinc-400 mb-3">
+                    Sets:
+                  </Text>
+                  {exerciseData.sets?.map((set, setIndex) => (
+                    <View
+                      key={set._key}
+                      className="bg-zinc-800/70 rounded-xl p-3 flex-row items-center justify-between border border-zinc-700/30"
+                    >
+                      <View className="flex-row items-center">
+                        <View className="bg-zinc-700/50 rounded-full w-7 h-7 items-center justify-center mr-3">
+                          <Text className="text-zinc-300 text-xs font-medium">
+                            {setIndex + 1}
+                          </Text>
+                        </View>
+                        <Text className="text-white font-medium">
+                          {set.reps} reps
+                        </Text>
+                      </View>
+
+                      {set.weight && (
+                        <View className="flex-row items-center">
+                          <Ionicons
+                            name="barbell-outline"
+                            size={16}
+                            color="#3b82f6"
+                          />
+                          <Text className="text-zinc-300 ml-2 font-medium">
+                            {set.weight} {set.weightUnit || "lbs"}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+
+                {/* Exercise Volume Summary */}
+                {exerciseData.sets && exerciseData.sets.length > 0 && (
+                  <View className="mt-4 pt-4 border-t border-zinc-800/70">
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center">
+                        <View className="w-6 h-6 bg-orange-500/15 rounded-lg items-center justify-center mr-2">
+                          <Ionicons
+                            name="barbell-outline"
+                            size={12}
+                            color="#f97316"
+                          />
+                        </View>
+                        <Text className="text-sm text-zinc-400">
+                          Exercise Volume:
+                        </Text>
+                      </View>
+                      <Text className="text-sm font-bold text-white">
+                        {exerciseData.sets
+                          .reduce((total, set) => {
+                            return total + (set.weight || 0) * (set.reps || 0);
+                          }, 0)
+                          .toLocaleString()}{" "}
+                        {exerciseData.sets[0]?.weightUnit || "lbs"}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
         </View>
+
+        {/* Bottom Spacing */}
+        <View className="h-6" />
       </ScrollView>
     </SafeAreaView>
   );
