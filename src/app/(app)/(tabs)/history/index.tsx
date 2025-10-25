@@ -116,11 +116,11 @@ export default function HistoryPage() {
               </Text>
             </View>
           ) : (
-            <View className="space-y-4 gap-4">
+            <View className="space-y-3 gap-3">
               {workouts.map((workout) => (
                 <TouchableOpacity
                   key={workout._id}
-                  className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800/50"
+                  className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800/50"
                   activeOpacity={0.7}
                   onPress={() => {
                     router.push({
@@ -131,98 +131,85 @@ export default function HistoryPage() {
                     });
                   }}
                 >
-                  {/* Workout Header */}
-                  <View className="flex-row items-center justify-between mb-4">
+                  {/* Compact Header Row */}
+                  <View className="flex-row items-center justify-between mb-3">
                     <View className="flex-1">
-                      <View className="flex-row items-center mb-2">
-                        <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                      <View className="flex-row items-center mb-1">
+                        <View className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2" />
                         <Text className="text-xs text-zinc-500 font-medium">
                           {formatWorkoutDate(workout.date || "")}
                         </Text>
+                        <View className="flex-row items-center ml-3">
+                          <Ionicons
+                            name="time-outline"
+                            size={12}
+                            color="#3b82f6"
+                          />
+                          <Text className="text-xs text-zinc-400 ml-1">
+                            {formatWorkoutDuration(workout.duration)}
+                          </Text>
+                        </View>
                       </View>
-                      <Text className="text-lg font-bold text-white mb-1">
+                      <Text className="text-base font-bold text-white">
                         Workout Session
                       </Text>
-                      <View className="flex-row items-center">
-                        <Ionicons
-                          name="time-outline"
-                          size={13}
-                          color="#3b82f6"
-                        />
-                        <Text className="text-sm text-zinc-400 ml-1.5">
-                          {formatWorkoutDuration(workout.duration)}
-                        </Text>
-                      </View>
                     </View>
-
-                    <View className="w-14 h-14 bg-blue-500/15 rounded-2xl items-center justify-center">
+                    <View className="w-10 h-10 bg-blue-500/15 rounded-xl items-center justify-center">
                       <Ionicons
                         name="fitness-outline"
-                        size={26}
+                        size={20}
                         color="#3b82f6"
                       />
                     </View>
                   </View>
 
-                  {/* Workout Stats */}
-                  <View className="flex-row items-center justify-between mb-4">
+                  {/* Compact Stats Row */}
+                  <View className="flex-row items-center justify-between mb-3">
                     <View className="flex-row items-center">
-                      <View className="bg-zinc-800/70 rounded-lg px-3 py-2 mr-3">
-                        <Text className="text-sm font-medium text-zinc-300">
+                      <View className="bg-zinc-800/70 rounded-lg px-2.5 py-1.5 mr-2">
+                        <Text className="text-xs font-medium text-zinc-300">
                           {workout.exercises?.length || 0} exercises
                         </Text>
                       </View>
-                      <View className="bg-zinc-800/70 rounded-lg px-3 py-2">
-                        <Text className="text-sm font-medium text-zinc-300">
+                      <View className="bg-zinc-800/70 rounded-lg px-2.5 py-1.5">
+                        <Text className="text-xs font-medium text-zinc-300">
                           {getTotalSets(workout)} sets
                         </Text>
                       </View>
                     </View>
-                  </View>
-
-                  {/* Exercise List */}
-                  {workout.exercises && workout.exercises.length > 0 && (
-                    <View className="mb-4">
-                      <Text className="text-sm font-medium text-zinc-400 mb-2">
-                        Exercises:
-                      </Text>
-                      <View className="flex-row flex-wrap">
-                        {getExerciseNames(workout)
-                          .slice(0, 3)
-                          .map((name, index) => (
-                            <View
-                              key={index}
-                              className="bg-blue-500/20 rounded-lg px-3 py-1 mr-2 mb-2 border border-blue-500/30"
-                            >
-                              <Text className="text-blue-400 text-sm font-medium">
-                                {name}
-                              </Text>
-                            </View>
-                          ))}
-                        {getExerciseNames(workout).length > 3 && (
-                          <View className="bg-zinc-800/70 rounded-lg px-3 py-1 mr-2 mb-2">
-                            <Text className="text-zinc-400 text-sm font-medium">
-                              +{getExerciseNames(workout).length - 3} more
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  )}
-
-                  {/* Bottom Action */}
-                  <View className="flex-row items-center justify-between pt-4 border-t border-zinc-800/70">
-                    <Text className="text-zinc-400 text-xs">
-                      Tap to view details
-                    </Text>
-                    <View className="w-7 h-7 bg-zinc-800/70 rounded-full items-center justify-center">
+                    <View className="w-6 h-6 bg-zinc-800/70 rounded-full items-center justify-center">
                       <Ionicons
                         name="chevron-forward"
-                        size={14}
+                        size={12}
                         color="#71717a"
                       />
                     </View>
                   </View>
+
+                  {/* Compact Exercise Tags */}
+                  {workout.exercises && workout.exercises.length > 0 && (
+                    <View className="flex-row flex-wrap">
+                      {getExerciseNames(workout)
+                        .slice(0, 4)
+                        .map((name, index) => (
+                          <View
+                            key={index}
+                            className="bg-blue-500/20 rounded-md px-2 py-1 mr-1.5 mb-1 border border-blue-500/30"
+                          >
+                            <Text className="text-blue-400 text-xs font-medium">
+                              {name}
+                            </Text>
+                          </View>
+                        ))}
+                      {getExerciseNames(workout).length > 4 && (
+                        <View className="bg-zinc-800/70 rounded-md px-2 py-1 mr-1.5 mb-1">
+                          <Text className="text-zinc-400 text-xs font-medium">
+                            +{getExerciseNames(workout).length - 4}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
