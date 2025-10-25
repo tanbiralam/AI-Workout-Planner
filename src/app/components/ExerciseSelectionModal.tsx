@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { useWorkoutStore } from "store/workout-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import ExerciseCard from "./ExerciseCard";
+import ExerciseSelectionCard from "./ExerciseSelectionCard";
 import { Exercise } from "@/lib/sanity/types";
 import { client } from "@/lib/sanity/client";
 import { exercisesQuery } from "../(app)/(tabs)/exercises";
@@ -117,7 +117,7 @@ export default function ExerciseSelectionModal({
         <FlatList
           data={filteredExercises}
           renderItem={({ item }) => (
-            <ExerciseCard
+            <ExerciseSelectionCard
               item={item}
               onPress={() => handleExercisePress(item)}
               showChevron={false}

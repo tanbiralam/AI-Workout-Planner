@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { defineQuery } from "groq";
 import { client } from "@/lib/sanity/client";
 import { Exercise } from "@/lib/sanity/types";
-import ExerciseCard from "@/app/components/ExerciseCard";
+import ExerciseSelectionCard from "@/app/components/ExerciseSelectionCard";
 
 export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
   ...
@@ -96,7 +96,7 @@ export default function Page() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 24 }}
         renderItem={({ item }) => (
-          <ExerciseCard
+          <ExerciseSelectionCard
             item={item}
             onPress={() => router.push(`/exercise-detail?id=${item._id}`)}
           />
