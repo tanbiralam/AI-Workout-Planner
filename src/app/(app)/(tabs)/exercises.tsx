@@ -8,6 +8,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StatusBar,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { defineQuery } from "groq";
@@ -16,28 +19,53 @@ import { Exercise } from "@/lib/sanity/types";
 import ExerciseSelectionCard from "@/app/components/ExerciseSelectionCard";
 
 export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
-  ...
+  _id,
+  name,
+  description,
+  difficulty,
+  muscleGroup,
+  image {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
+  videoUrl,
+  isActive
 }`);
 
 export default function Page() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-
-  const [filteredExercises, setFilteredExercises] = useState([]);
+  const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchExercises = async () => {
     try {
-      //data fetching from sanity
-
-      const exercises = await client.fetch(exercisesQuery);
-
-      setExercises(exercises);
-      setFilteredExercises(exercises);
+      setError(null);
+      const exercisesData = await client.fetch(exercisesQuery);
+      setExercises(exercisesData);
+      setFilteredExercises(exercisesData);
     } catch (error) {
       console.error("Error fetching exercises:", error);
-      // You could add error handling here, like showing a toast
+      const errorMessage = "Failed to load exercises. Please try again.";
+      setError(errorMessage);
+      Alert.alert("Error", errorMessage, [
+        {
+          text: "Retry",
+          onPress: () => fetchExercises(),
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,34 +86,66 @@ export default function Page() {
     setRefreshing(false);
   };
 
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+        <StatusBar barStyle="light-content" backgroundColor="#0D0D0D" />
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="w-20 h-20 bg-blue-500/20 rounded-3xl items-center justify-center mb-6">
+            <ActivityIndicator size="large" color="#3b82f6" />
+          </View>
+          <Text className="text-white text-lg font-semibold">
+            Loading Exercises
+          </Text>
+          <Text className="text-zinc-500 text-sm mt-2">Please wait...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView className="bg-gray-50 flex-1">
-      {/*Header*/}
-      <View className="px-6 py-4 bg-white border-b border-gray-200">
-        <Text className="text-2xl font-bold text-gray-900">
-          Exercise Library
-        </Text>
-        <Text className="mt-1 text-gray-600">
+    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+      <StatusBar barStyle="light-content" backgroundColor="#0D0D0D" />
+
+      {/* Header */}
+      <View className="px-5 pt-4 pb-6">
+        <View className="flex-row items-center mb-3">
+          <View className="w-1 h-8 bg-blue-500 rounded-full mr-3" />
+          <Text className="text-3xl font-bold text-white">
+            Exercise Library
+          </Text>
+        </View>
+        <Text className="text-base text-zinc-400 ml-4 mb-6">
           Discover and master new exercises
         </Text>
 
-        {/* {Search Bar} */}
-
-        <View className="flex-row items-center bg-gray-100 rounded-xl px-4 mt-4">
-          <Ionicons name="search" size={20} color="#6B7280" />
-          <TextInput
-            className="flex-1 ml-3 text-gray-800"
-            placeholder="Search exercises..."
-            placeholderTextColor="#9CA4AF"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={20} color="#6B7280" />
-            </TouchableOpacity>
-          )}
+        {/* Search Bar */}
+        <View className="bg-zinc-900 rounded-2xl border border-zinc-800/50">
+          <View className="flex-row items-center px-4 py-4">
+            <View className="w-10 h-10 bg-zinc-800/70 rounded-xl items-center justify-center mr-3">
+              <Ionicons name="search" size={18} color="#71717a" />
+            </View>
+            <TextInput
+              className="flex-1 text-white text-base"
+              placeholder="Search exercises..."
+              placeholderTextColor="#71717a"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                onPress={clearSearch}
+                className="w-8 h-8 bg-zinc-800/70 rounded-full items-center justify-center ml-2"
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={16} color="#71717a" />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
 
@@ -94,34 +154,53 @@ export default function Page() {
         data={filteredExercises}
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 24 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
         renderItem={({ item }) => (
-          <ExerciseSelectionCard
-            item={item}
-            onPress={() => router.push(`/exercise-detail?id=${item._id}`)}
-          />
+          <View className="mb-3">
+            <ExerciseSelectionCard
+              item={item}
+              onPress={() => router.push(`/exercise-detail?id=${item._id}`)}
+            />
+          </View>
         )}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#3B8F2F6"]} // android
-            tintColor={"#3B8F2F6"} //ios
-            title="Pull to refres exercises" // ios
-            titleColor="#6B7280"
+            colors={["#3b82f6"]}
+            tintColor="#3b82f6"
+            title="Pull to refresh exercises"
+            titleColor="#71717a"
           />
         }
         ListEmptyComponent={
-          <View className="bg-white rounded-2xl p-8 items-center">
-            <Ionicons name="fitness-outline" size={64} color="#9CA3AF" />
-            <Text className="text-xl font-semibold text-gray-900 mt-4">
-              {searchQuery ? "No exercises found" : "Loading exercises..."}
+          <View className="bg-zinc-900 rounded-3xl p-8 items-center border border-zinc-800/50 mx-5">
+            <View className="w-20 h-20 bg-zinc-800/70 rounded-3xl items-center justify-center mb-6">
+              <Ionicons
+                name={searchQuery ? "search-outline" : "barbell-outline"}
+                size={40}
+                color="#71717a"
+              />
+            </View>
+            <Text className="text-xl font-bold text-white mb-2 text-center">
+              {searchQuery ? "No exercises found" : "No exercises available"}
             </Text>
-            <Text className="text-gray-600 text-center mt-2">
+            <Text className="text-zinc-400 text-center text-sm leading-relaxed">
               {searchQuery
-                ? "Try adjusting your search"
-                : "Your exercises will appear here"}
+                ? "Try adjusting your search terms"
+                : "Exercises will appear here once they're added"}
             </Text>
+            {searchQuery && (
+              <TouchableOpacity
+                onPress={clearSearch}
+                className="bg-blue-600 rounded-2xl px-6 py-3 mt-4"
+                activeOpacity={0.85}
+              >
+                <Text className="text-white font-semibold text-sm">
+                  Clear Search
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         }
       />
