@@ -279,7 +279,12 @@ export default function ActiveWorkout() {
   };
 
   return (
-    <View className="flex-1 bg-black">
+    <SafeAreaView
+      className="flex-1 bg-black"
+      style={{
+        paddingTop: Platform.OS === "ios" ? StatusBar.currentHeight : 0,
+      }}
+    >
       <StatusBar barStyle="light-content" backgroundColor="#0D0D0D" />
 
       {/* Header */}
@@ -463,6 +468,6 @@ export default function ActiveWorkout() {
         visible={showExerciseSelection}
         onClose={() => setShowExerciseSelection(false)}
       />
-    </View>
+    </SafeAreaView>
   );
 }
