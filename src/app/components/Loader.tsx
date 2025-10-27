@@ -1,7 +1,7 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ActivityIndicator } from "react-native";
 
-const Loader = () => {
+const Loader = ({ title = "Loading...", subtitle = "Please wait..." }) => {
   return (
     <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
       <View className="flex-1 items-center justify-center px-6">
@@ -10,11 +10,9 @@ const Loader = () => {
           <ActivityIndicator size="large" color="#3b82f6" />
         </View>
 
-        {/* Loading Text */}
-        <Text className="text-white text-lg font-semibold">
-          Loading Profile
-        </Text>
-        <Text className="text-zinc-500 text-sm mt-2">Please wait...</Text>
+        {/* Dynamic Text */}
+        <Text className="text-white text-lg font-semibold">{title}</Text>
+        <Text className="text-zinc-500 text-sm mt-2">{subtitle}</Text>
       </View>
     </SafeAreaView>
   );

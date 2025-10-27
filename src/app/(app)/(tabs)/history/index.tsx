@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Loader from "@/app/components/Loader";
 
 export default function HistoryPage() {
   const { user } = useUser();
@@ -52,22 +53,10 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor="#0D0D0D"
-          translucent={false}
-        />
-        <View className="px-5 pt-4 pb-6">
-          <Text className="text-3xl font-bold text-white leading-tight">
-            Workout History
-          </Text>
-        </View>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#3b82f6" />
-          <Text className="text-zinc-400 mt-4">Loading your workouts...</Text>
-        </View>
-      </SafeAreaView>
+      <Loader
+        title="Loading your workouts..."
+        subtitle="Hang tight before fetching your logs"
+      />
     );
   }
 

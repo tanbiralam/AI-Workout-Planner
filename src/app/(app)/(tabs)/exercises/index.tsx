@@ -17,6 +17,7 @@ import { defineQuery } from "groq";
 import { client } from "@/lib/sanity/client";
 import { Exercise } from "@/lib/sanity/types";
 import ExerciseSelectionCard from "@/app/components/ExerciseSelectionCard";
+import Loader from "@/app/components/Loader";
 
 export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
   _id,
@@ -92,18 +93,10 @@ export default function Page() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
-        <StatusBar barStyle="light-content" backgroundColor="#0D0D0D" />
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="w-20 h-20 bg-blue-500/20 rounded-3xl items-center justify-center mb-6">
-            <ActivityIndicator size="large" color="#3b82f6" />
-          </View>
-          <Text className="text-white text-lg font-semibold">
-            Loading Exercises
-          </Text>
-          <Text className="text-zinc-500 text-sm mt-2">Please wait...</Text>
-        </View>
-      </SafeAreaView>
+      <Loader
+        title="Loading Exercises..."
+        subtitle="Please wait to load the exercises"
+      />
     );
   }
 

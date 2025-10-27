@@ -1,3 +1,4 @@
+import Loader from "@/app/components/Loader";
 import { useWorkouts } from "@/hooks/useWorkout";
 import { formatDuration } from "@/lib/utils";
 import { calculateStats } from "@/lib/workoutUtils";
@@ -56,12 +57,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#3B82F6" />
-          <Text className="text-gray-600 mt-4">Loading profile...</Text>
-        </View>
-      </SafeAreaView>
+      <Loader
+        title="Loading Profile..."
+        subtitle="Please wait till we fetched your profile info"
+      />
     );
   }
 

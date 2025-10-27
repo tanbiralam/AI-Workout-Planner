@@ -16,6 +16,7 @@ import { formatDuration } from "@/lib/utils";
 import { getTotalSets } from "@/lib/workoutUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import Loader from "@/app/components/Loader";
 
 const getWorkoutRecordQuery =
   defineQuery(`*[_type == "workout" && _id == $workoutId][0] {
@@ -119,22 +120,7 @@ export default function WorkoutRecord() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor="#0D0D0D"
-          translucent={false}
-        />
-        <View className="flex-1 items-center justify-center">
-          <View className="w-20 h-20 bg-blue-500/20 rounded-3xl items-center justify-center mb-6">
-            <ActivityIndicator size="large" color="#3b82f6" />
-          </View>
-          <Text className="text-zinc-400 text-lg font-semibold">
-            Loading Workout
-          </Text>
-          <Text className="text-zinc-500 text-sm mt-2">Please wait...</Text>
-        </View>
-      </SafeAreaView>
+      <Loader title="Loading Your Workouts" subtitle="Please wait for a bit" />
     );
   }
 
