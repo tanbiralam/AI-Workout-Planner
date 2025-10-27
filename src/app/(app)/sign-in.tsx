@@ -1,16 +1,21 @@
+import React from "react";
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import GoogleSignIn from "../components/GoogleSignIn";
 
@@ -22,7 +27,13 @@ export default function Page() {
   const [emailAddress, setEmailAddress] = React.useState("");
   const [password, setPassword] = React.useState("");
 
-  // Handle the submission of the sign-in form
+  const heroImage = React.useMemo(
+    () => ({
+      uri: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1200",
+    }),
+    []
+  );
+
   const onSignInPress = async () => {
     if (!isLoaded) return;
 
@@ -33,26 +44,19 @@ export default function Page() {
 
     setIsLoading(true);
 
-    // Start the sign-in process using the email and password provided
     try {
       const signInAttempt = await signIn.create({
         identifier: emailAddress,
         password,
       });
 
-      // If sign-in process is complete, set the created session as active
-      // and redirect the user
       if (signInAttempt.status === "complete") {
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace("/");
       } else {
-        // If the status isn't complete, check why. User might need to
-        // complete further steps.
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
       console.error(JSON.stringify(err, null, 2));
     } finally {
       setIsLoading(false);
@@ -60,127 +64,195 @@ export default function Page() {
   };
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
+      <StatusBar barStyle="light-content" backgroundColor="#000" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <View className="flex-1 px-6">
-          {/* Header Section */}
-          <View className="flex-1 justify-center">
-            {/* Logo Branding */}
-            <View className="items-center mb-8">
-              <View className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
-                <Ionicons name="fitness-sharp" size={40} color="white" />
-              </View>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="flex-1">
+            {/* Hero Section with Image Background */}
+            <View className="relative h-80">
+              <Image
+                source={heroImage}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0.95)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFillObject}
+              />
 
-              <Text className="text-3xl font-bold text-gray-900 mb-2">
-                FitTracker
-              </Text>
-              <Text className="text-lg text-gray-600 text-center">
-                Track your fitness journey with ease
-              </Text>
-            </View>
-
-            {/* Sign In Form */}
-
-            <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-              <Text className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                Welcome Back
-              </Text>
-
-              {/* Email Input */}
-
-              <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </Text>
-
-                <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border border-gray-200">
-                  <Ionicons name="mail" size={20} color="#6B7280" />
-                  <TextInput
-                    autoCapitalize="none"
-                    value={emailAddress}
-                    placeholder="Enter email"
-                    placeholderClassName="#9CA3AF"
-                    onChangeText={setEmailAddress}
-                    className="flex-1 ml-3 text-gray-900"
-                    editable={!isLoading}
-                  />
+              {/* Header Content */}
+              <View className="absolute inset-x-0 top-8 px-6">
+                <View className="flex-row items-center mb-3">
+                  <View className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center mr-3">
+                    <Ionicons name="barbell" size={22} color="#fff" />
+                  </View>
+                  <Text className="text-white text-xl font-bold tracking-tight">
+                    FitTracker
+                  </Text>
                 </View>
+                <Text className="text-white text-3xl font-bold leading-tight mt-6">
+                  Welcome{"\n"}Back
+                </Text>
+                <Text className="text-zinc-300 text-base mt-3 leading-relaxed">
+                  Continue your fitness journey
+                </Text>
               </View>
+            </View>
 
-              {/* Password Input */}
-
-              <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-700 mb-2">
-                  Password
+            {/* Form Section */}
+            <View className="flex-1 px-6 -mt-6">
+              <View className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
+                <Text className="text-white text-2xl font-bold mb-1">
+                  Sign In
+                </Text>
+                <Text className="text-zinc-400 text-sm mb-6">
+                  Enter your credentials to access your account
                 </Text>
 
-                <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border border-gray-200">
-                  <Ionicons name="lock-closed" size={20} color="#6B7280" />
-                  <TextInput
-                    value={password}
-                    placeholder="Enter password"
-                    placeholderClassName="#9CA3AF"
-                    onChangeText={setPassword}
-                    className="flex-1 ml-3 text-gray-900"
-                    editable={!isLoading}
-                  />
+                <View>
+                  <View className="mb-4">
+                    <Text className="text-zinc-400 text-sm font-medium mb-2.5">
+                      Email Address
+                    </Text>
+                    <View className="bg-black/40 border border-zinc-800 rounded-xl overflow-hidden">
+                      <View className="flex-row items-center px-4 py-3.5">
+                        <Ionicons
+                          name="mail-outline"
+                          size={20}
+                          color="#71717a"
+                        />
+                        <TextInput
+                          autoCapitalize="none"
+                          value={emailAddress}
+                          placeholder="your@email.com"
+                          placeholderTextColor="#52525b"
+                          onChangeText={setEmailAddress}
+                          className="flex-1 ml-3 text-white text-base"
+                          editable={!isLoading}
+                          keyboardType="email-address"
+                          returnKeyType="next"
+                        />
+                      </View>
+                    </View>
+                  </View>
+
+                  <View className="mb-6">
+                    <View className="flex-row justify-between items-center mb-2.5">
+                      <Text className="text-zinc-400 text-sm font-medium">
+                        Password
+                      </Text>
+                      <TouchableOpacity activeOpacity={0.7}>
+                        <Text className="text-blue-400 text-sm font-medium">
+                          Forgot?
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View className="bg-black/40 border border-zinc-800 rounded-xl overflow-hidden">
+                      <View className="flex-row items-center px-4 py-3.5">
+                        <Ionicons
+                          name="lock-closed-outline"
+                          size={20}
+                          color="#71717a"
+                        />
+                        <TextInput
+                          value={password}
+                          placeholder="Enter your password"
+                          placeholderTextColor="#52525b"
+                          onChangeText={setPassword}
+                          className="flex-1 ml-3 text-white text-base"
+                          editable={!isLoading}
+                          secureTextEntry
+                          returnKeyType="done"
+                        />
+                      </View>
+                    </View>
+                  </View>
                 </View>
-              </View>
-            </View>
 
-            {/* Sign In Button */}
-
-            <TouchableOpacity
-              onPress={onSignInPress}
-              disabled={isLoading}
-              className={`rounded-xl py-4 shadow-sm mb-4 ${
-                isLoading ? "bg-gray-400" : "bg-blue-600"
-              }`}
-              activeOpacity={0.8}
-            >
-              <View className="flex-row items-center justify-center">
-                {isLoading ? (
-                  <Ionicons name="refresh-circle" size={20} color="#6B7280" />
-                ) : (
-                  <Ionicons name="log-in" size={20} color="white" />
-                )}
-                <Text className="text-white font-semibold text-lg ml-2">
-                  {isLoading ? "Signing in..." : "Sign in"}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <View className="text-row items-center my-4">
-              <View className="flex-1 h-px bg-gray-200"></View>
-              <Text className="px-4 text-gray-500 text-sm">or</Text>
-              <View className="flex-1 h-px bg-gray-200"></View>
-            </View>
-
-            {/* Google Sign In Button */}
-            <GoogleSignIn />
-            <View className="flex-row justify-center items-center mt-4">
-              <Text className="text-gray-600">Don't have an account?</Text>
-
-              <Link href="/sign-up" asChild>
-                <TouchableOpacity>
-                  <Text className="text-blue-600 font-semibold">Sign Up</Text>
+                <TouchableOpacity
+                  onPress={onSignInPress}
+                  disabled={isLoading}
+                  activeOpacity={0.8}
+                  className="mb-5"
+                >
+                  <LinearGradient
+                    colors={
+                      isLoading
+                        ? ["#27272a", "#18181b"]
+                        : ["#3b82f6", "#2563eb"]
+                    }
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    className="rounded-xl py-4"
+                  >
+                    <View className="flex-row items-center justify-center">
+                      {isLoading ? (
+                        <Ionicons
+                          name="hourglass-outline"
+                          size={20}
+                          color="#fff"
+                        />
+                      ) : (
+                        <Ionicons name="arrow-forward" size={20} color="#fff" />
+                      )}
+                      <Text className="text-white font-bold text-base ml-2">
+                        {isLoading ? "Signing in..." : "Sign In"}
+                      </Text>
+                    </View>
+                  </LinearGradient>
                 </TouchableOpacity>
-              </Link>
+
+                <View className="flex-row items-center mb-5">
+                  <View className="flex-1 h-px bg-zinc-800" />
+                  <Text className="px-4 text-zinc-500 text-xs font-medium">
+                    OR
+                  </Text>
+                  <View className="flex-1 h-px bg-zinc-800" />
+                </View>
+
+                <GoogleSignIn />
+
+                <View className="flex-row justify-center items-center mt-6 pt-5 border-t border-zinc-800">
+                  <Text className="text-zinc-400 text-sm">
+                    Don't have an account?
+                  </Text>
+                  <Link href="/sign-up" asChild>
+                    <TouchableOpacity activeOpacity={0.7} className="ml-1.5">
+                      <Text className="text-blue-400 font-semibold text-sm">
+                        Sign Up
+                      </Text>
+                    </TouchableOpacity>
+                  </Link>
+                </View>
+              </View>
+
+              {/* Footer */}
+              <View className="items-center mt-8 mb-6">
+                <View className="flex-row items-center mb-3">
+                  <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2" />
+                  <Text className="text-zinc-500 text-xs font-medium">
+                    Secure authentication
+                  </Text>
+                </View>
+                <Text className="text-zinc-600 text-xs text-center px-8">
+                  Your data is encrypted and protected with industry-standard
+                  security
+                </Text>
+              </View>
             </View>
           </View>
-
-          {/* Sign Up Link */}
-
-          {/*Footer */}
-          <View className="pb-6">
-            <Text className="text-center text-gray-500 text-sm">
-              Start Your Fitness Journey Today
-            </Text>
-          </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
