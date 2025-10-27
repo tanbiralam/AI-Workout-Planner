@@ -16,7 +16,7 @@ function Workout() {
   const router = useRouter();
 
   const startWorkout = () => {
-    router.push("/active-workout");
+    router.push("workout/active-workout");
   };
 
   return (
