@@ -159,7 +159,14 @@ export default function Page() {
           <View className="mb-3">
             <ExerciseSelectionCard
               item={item}
-              onPress={() => router.push(`/exercise-detail?id=${item._id}`)}
+              onPress={() => {
+                router.push({
+                  pathname: "/exercises/exercise-detail",
+                  params: {
+                    id: item._id,
+                  },
+                });
+              }}
             />
           </View>
         )}
