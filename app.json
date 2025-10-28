@@ -15,6 +15,23 @@
       ]
     ],
     "name": "fit-app",
-    "slug": "fit-app"
+    "slug": "fit-app",
+    "extra": {
+      "router": {
+        "origin": "https://n"
+      },
+      "eas": {
+        "projectId": "2e8d2bc4-f641-47d8-a794-4c68981e542d"
+      }
+    },
+    "android": {
+      "package": "com.tanvirrrr.fitapp"
+    },
+    "ios": {
+      "bundleIdentifier": "com.tanvirrrr.fitapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
   }
 }
