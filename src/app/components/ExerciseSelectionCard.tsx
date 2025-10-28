@@ -14,6 +14,9 @@ export default function ExerciseSelectionCard({
   onPress,
   showChevron = true,
 }: ExerciseSelectionCardProps) {
+  const formatLabel = (value: string) =>
+    value ? value.replace(/\b\w/g, (char) => char.toUpperCase()) : value;
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty?.toLowerCase()) {
       case "beginner":
@@ -46,6 +49,13 @@ export default function ExerciseSelectionCard({
     }
   };
 
+  const primaryFocus =
+    item.muscleGroup || item.bodyParts?.[0] || item.targetMuscles?.[0];
+  const assetWithUrl = item.image?.asset as { url?: string } | undefined;
+  const thumbnailUri =
+    assetWithUrl?.url || item.gifUrl || item.sourceImageUrl || null;
+  const equipmentLabel = item.equipments?.[0];
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -56,16 +66,16 @@ export default function ExerciseSelectionCard({
         <View className="flex-row items-start">
           {/* Exercise Image */}
           <View className="w-20 h-20 bg-zinc-800/70 rounded-2xl mr-4 overflow-hidden">
-            {item.image?.asset?.url ? (
+            {thumbnailUri ? (
               <Image
-                source={{ uri: item.image.asset.url }}
+                source={{ uri: thumbnailUri }}
                 className="w-full h-full"
                 resizeMode="cover"
               />
             ) : (
               <View className="w-full h-full items-center justify-center">
                 <Ionicons
-                  name={getMuscleGroupIcon(item.muscleGroup)}
+                  name={getMuscleGroupIcon(primaryFocus)}
                   size={24}
                   color="#71717a"
                 />
@@ -79,38 +89,50 @@ export default function ExerciseSelectionCard({
             <View className="flex-row items-center mb-2">
               <View className="w-6 h-6 bg-blue-500/20 rounded-lg items-center justify-center mr-2">
                 <Ionicons
-                  name={getMuscleGroupIcon(item.muscleGroup)}
+                  name={getMuscleGroupIcon(primaryFocus)}
                   size={12}
                   color="#3b82f6"
                 />
               </View>
               <Text className="text-xs text-zinc-500 font-medium uppercase tracking-wide">
-                {item.muscleGroup || "Exercise"}
+                {formatLabel(primaryFocus) || "Exercise"}
               </Text>
             </View>
 
             {/* Exercise Name */}
-            <Text className="text-lg font-bold text-white mb-2 leading-tight">
+            <Text className="text-lg font-bold text-white mb-2 capitalize leading-tight">
               {item.name}
             </Text>
 
             {/* Difficulty Badge */}
-            {item.difficulty && (
-              <View className="flex-row items-center">
-                <View
-                  className="px-3 py-1.5 rounded-full border"
-                  style={{
-                    backgroundColor: `${getDifficultyColor(item.difficulty)}15`,
-                    borderColor: `${getDifficultyColor(item.difficulty)}30`,
-                  }}
-                >
-                  <Text
-                    className="text-xs font-semibold"
-                    style={{ color: getDifficultyColor(item.difficulty) }}
-                  >
-                    {item.difficulty}
+            {(item.difficulty || equipmentLabel) && (
+              <View>
+                {item.difficulty && (
+                  <View className="flex-row items-center">
+                    <View
+                      className="px-3 py-1.5 rounded-full border"
+                      style={{
+                        backgroundColor: `${getDifficultyColor(
+                          item.difficulty
+                        )}15`,
+                        borderColor: `${getDifficultyColor(item.difficulty)}30`,
+                      }}
+                    >
+                      <Text
+                        className="text-xs font-semibold"
+                        style={{ color: getDifficultyColor(item.difficulty) }}
+                      >
+                        {item.difficulty}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {equipmentLabel && (
+                  <Text className="text-xs text-zinc-500 mt-2">
+                    {`Equipment: ${formatLabel(equipmentLabel)}`}
                   </Text>
-                </View>
+                )}
               </View>
             )}
           </View>

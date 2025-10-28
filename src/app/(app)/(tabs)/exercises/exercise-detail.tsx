@@ -9,15 +9,15 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { client, urlFor } from "@/lib/sanity/client";
 import { Exercise } from "@/lib/sanity/types";
 import { defineQuery } from "groq";
-import { getDifficultyColor, getDifficultyText } from "@/lib/utils";
-import Markdown from "react-native-markdown-display";
+import { getDifficultyColor } from "@/lib/utils";
+import Loader from "@/app/components/Loader";
 
 const singleExerciseQuery = defineQuery(
   `*[_type == "exercise" && _id == $id][0]`
@@ -28,8 +28,6 @@ export default function ExerciseDetails() {
 
   const [exercise, setExercise] = useState<Exercise>(null);
   const [loading, setLoading] = useState(true);
-  const [aiGuidance, setAiGuidance] = useState<string>("");
-  const [aiLoading, setAiLoading] = useState(false);
 
   const { id } = useLocalSearchParams<{
     id: string;
@@ -67,51 +65,35 @@ export default function ExerciseDetails() {
     fetchExercise();
   }, [id]);
 
-  const getAIGuidance = async () => {
-    if (!exercise) return;
-    setAiLoading(true);
+  const heroImageUri = useMemo(() => {
+    if (!exercise) return null;
+    if (exercise.gifUrl) return exercise.gifUrl;
+    if (exercise.sourceImageUrl) return exercise.sourceImageUrl;
 
-    try {
-      const response = await fetch("/api/ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          exerciseName: exercise.name,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch AI guidance");
+    const assetRef = exercise.image?.asset?._ref;
+    if (assetRef) {
+      try {
+        return urlFor(assetRef).url();
+      } catch (error) {
+        console.warn("Failed to build image URL", error);
+        return null;
       }
-
-      const data = await response.json();
-      setAiGuidance(data.message);
-    } catch (error) {
-      console.error("Error fetching AI guidance", error);
-      setAiGuidance(
-        "Sorry, there was an error getting AI guidance. Please try again."
-      );
-    } finally {
-      setAiLoading(false);
     }
-  };
+    return null;
+  }, [exercise]);
+
+  const primaryBodyPart = exercise?.bodyParts?.[0] ?? exercise?.muscleGroup;
+  const equipmentList = exercise?.equipments ?? [];
+  const targetMuscles = exercise?.targetMuscles ?? [];
+  const secondaryMuscles = exercise?.secondaryMuscles ?? [];
+  const instructions = exercise?.instructions ?? [];
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={["top"]}>
-        <StatusBar barStyle="light-content" backgroundColor="#0D0D0D" />
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="w-20 h-20 bg-blue-500/20 rounded-3xl items-center justify-center mb-6">
-            <ActivityIndicator size="large" color="#3b82f6" />
-          </View>
-          <Text className="text-white text-lg font-semibold">
-            Loading Exercise
-          </Text>
-          <Text className="text-zinc-500 text-sm mt-2">Please wait...</Text>
-        </View>
-      </SafeAreaView>
+      <Loader
+        title="Loading Exercise Details"
+        subtitle="Hold on for a few seconds"
+      />
     );
   }
 
@@ -157,35 +139,12 @@ export default function ExerciseDetails() {
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Hero Image */}
-        <View className="h-80 bg-zinc-900 relative">
-          {exercise?.image ? (
-            <Image
-              source={{ uri: urlFor(exercise.image?.asset?._ref).url() }}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
-          ) : (
-            <View className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 items-center justify-center">
-              <View className="w-24 h-24 bg-white/20 rounded-3xl items-center justify-center mb-4">
-                <Ionicons name="barbell-outline" size={40} color="white" />
-              </View>
-              <Text className="text-white text-lg font-semibold">
-                Exercise Image
-              </Text>
-            </View>
-          )}
-
-          {/* Gradient overlay */}
-          <View className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent" />
-        </View>
-
         {/* Exercise Details */}
-        <View className="px-5 py-6">
+        <View className="px-5 pt-20 pb-6">
           {/* Title and difficulty */}
           <View className="flex-row items-start justify-between mb-6">
             <View className="flex-1 mr-4">
-              <Text className="text-3xl font-bold text-white mb-2 leading-tight">
+              <Text className="text-3xl font-bold capitalize text-white mb-2 leading-tight">
                 {exercise?.name}
               </Text>
             </View>
@@ -222,140 +181,182 @@ export default function ExerciseDetails() {
             <View className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800/50">
               <Text className="text-zinc-300 leading-6 text-base">
                 {exercise?.description ||
-                  "No description available for this exercise"}
+                  "No description available. Check back later for detailed guidance."}
               </Text>
             </View>
           </View>
 
-          {exercise?.videoUrl && (
+          {(primaryBodyPart ||
+            targetMuscles.length > 0 ||
+            secondaryMuscles.length > 0 ||
+            equipmentList.length > 0) && (
             <View className="mb-6">
               <View className="flex-row items-center mb-4">
-                <View className="w-8 h-8 bg-red-500/20 rounded-xl items-center justify-center mr-3">
-                  <Ionicons
-                    name="play-circle-outline"
-                    size={16}
-                    color="#ef4444"
-                  />
+                <View className="w-8 h-8 bg-green-500/20 rounded-xl items-center justify-center mr-3">
+                  <Ionicons name="barbell-outline" size={16} color="#22c55e" />
                 </View>
                 <Text className="text-xl font-bold text-white">
-                  Video Tutorial
+                  Movement Focus
                 </Text>
               </View>
-              <TouchableOpacity
-                className="bg-red-600 rounded-2xl p-5 flex-row items-center shadow-lg"
-                onPress={() => Linking.openURL(exercise.videoUrl)}
-                activeOpacity={0.85}
-              >
-                <View className="w-14 h-14 bg-white/20 rounded-2xl items-center justify-center mr-4">
-                  <Ionicons name="play" size={24} color="white" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-white font-bold text-lg">
-                    Watch Tutorial
-                  </Text>
-                  <Text className="text-red-100 text-sm mt-1">
-                    Learn proper form and technique
-                  </Text>
-                </View>
-                <View className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center">
-                  <Ionicons name="chevron-forward" size={16} color="white" />
-                </View>
-              </TouchableOpacity>
+
+              <View className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800/50">
+                {primaryBodyPart && (
+                  <View className="flex-row items-start mb-4">
+                    <View className="w-10 h-10 bg-zinc-800/70 rounded-xl items-center justify-center mr-3">
+                      <Ionicons name="body-outline" size={18} color="#38bdf8" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-sm text-zinc-400 uppercase font-semibold tracking-wide">
+                        Primary Body Part
+                      </Text>
+                      <Text className="text-base text-white mt-1 capitalize">
+                        {primaryBodyPart}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {targetMuscles.length > 0 && (
+                  <View className="flex-row items-start mb-4">
+                    <View className="w-10 h-10 bg-zinc-800/70 rounded-xl items-center justify-center mr-3">
+                      <Ionicons
+                        name="flash-outline"
+                        size={18}
+                        color="#facc15"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-sm text-zinc-400 uppercase font-semibold tracking-wide">
+                        Target Muscles
+                      </Text>
+                      <Text className="text-base text-white mt-1">
+                        {targetMuscles.join(", ")}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {secondaryMuscles.length > 0 && (
+                  <View className="flex-row items-start mb-4">
+                    <View className="w-10 h-10 bg-zinc-800/70 rounded-xl items-center justify-center mr-3">
+                      <Ionicons
+                        name="radio-outline"
+                        size={18}
+                        color="#a855f7"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-sm text-zinc-400 uppercase font-semibold tracking-wide">
+                        Secondary Muscles
+                      </Text>
+                      <Text className="text-base text-white mt-1">
+                        {secondaryMuscles.join(", ")}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {equipmentList.length > 0 && (
+                  <View className="flex-row items-start">
+                    <View className="w-10 h-10 bg-zinc-800/70 rounded-xl items-center justify-center mr-3">
+                      <Ionicons
+                        name="construct-outline"
+                        size={18}
+                        color="#3b82f6"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-sm text-zinc-400 uppercase font-semibold tracking-wide">
+                        Equipment Needed
+                      </Text>
+                      <Text className="text-base text-white mt-1 capitalize">
+                        {equipmentList.join(", ")}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
             </View>
           )}
 
-          {/* AI Guidance Section */}
-          {(aiGuidance || aiLoading) && (
+          {instructions.length > 0 && (
             <View className="mb-6">
               <View className="flex-row items-center mb-4">
                 <View className="w-8 h-8 bg-purple-500/20 rounded-xl items-center justify-center mr-3">
-                  <Ionicons name="sparkles-outline" size={16} color="#a855f7" />
+                  <Ionicons
+                    name="list-circle-outline"
+                    size={16}
+                    color="#a855f7"
+                  />
                 </View>
                 <Text className="text-xl font-bold text-white">
-                  AI Coach Guidance
+                  Step-by-step Instructions
                 </Text>
               </View>
 
-              {aiLoading ? (
-                <View className="bg-zinc-900 rounded-2xl p-6 items-center border border-zinc-800/50">
-                  <View className="w-12 h-12 bg-blue-500/20 rounded-2xl items-center justify-center mb-4">
-                    <ActivityIndicator size="small" color="#3b82f6" />
-                  </View>
-                  <Text className="text-zinc-300 text-center">
-                    Getting personalized guidance...
-                  </Text>
-                </View>
-              ) : (
-                <View className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800/50">
-                  <Markdown
-                    style={{
-                      body: {
-                        paddingBottom: 0,
-                      },
-                      heading2: {
-                        fontSize: 18,
-                        fontWeight: "bold",
-                        color: "#ffffff",
-                        marginTop: 12,
-                        marginBottom: 6,
-                      },
-                      heading3: {
-                        fontSize: 16,
-                        fontWeight: "600",
-                        color: "#d1d5db",
-                        marginTop: 8,
-                        marginBottom: 4,
-                      },
-                      paragraph: {
-                        color: "#d1d5db",
-                        fontSize: 14,
-                        lineHeight: 20,
-                      },
-                    }}
-                  >
-                    {aiGuidance}
-                  </Markdown>
-                </View>
-              )}
+              <View className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800/50">
+                {instructions.map((step, index) => {
+                  const stepNumberMatch = step.match(/Step:?(\d+)/i);
+                  const parsedNumber =
+                    stepNumberMatch?.[1] ?? String(index + 1);
+                  const cleanedText = step.replace(/^Step:?\d+\s*/i, "").trim();
+
+                  return (
+                    <View
+                      key={`${parsedNumber}-${index}`}
+                      className={`flex-row items-start ${
+                        index !== instructions.length - 1 ? "mb-4" : ""
+                      }`}
+                    >
+                      <View className="w-9 h-9 rounded-xl bg-white/10 items-center justify-center mr-3 border border-white/20">
+                        <Text className="text-white font-semibold">
+                          {parsedNumber}
+                        </Text>
+                      </View>
+                      <Text className="flex-1 text-zinc-300 leading-6 text-base">
+                        {cleanedText.length > 0 ? cleanedText : step}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
             </View>
           )}
 
-          {/* Action Buttons */}
-          <View className="mt-8 gap-3">
-            {/* AI Coach Button */}
-            <TouchableOpacity
-              className={`rounded-2xl py-5 items-center shadow-lg ${
-                aiLoading
-                  ? "bg-zinc-700"
-                  : aiGuidance
-                  ? "bg-green-600"
-                  : "bg-blue-600"
-              }`}
-              onPress={getAIGuidance}
-              disabled={aiLoading}
-              activeOpacity={0.85}
-            >
-              {aiLoading ? (
-                <View className="flex-row items-center">
-                  <ActivityIndicator size="small" color="white" />
-                  <Text className="text-white font-bold text-lg ml-3">
-                    Loading...
-                  </Text>
-                </View>
-              ) : (
-                <View className="flex-row items-center">
-                  <View className="w-8 h-8 bg-white/20 rounded-xl items-center justify-center mr-3">
-                    <Ionicons name="sparkles" size={16} color="white" />
+          {/* Animated Preview */}
+          <View className="mb-6">
+            <View className="rounded-3xl overflow-hidden border border-zinc-800/50">
+              <View className="h-80 bg-zinc-900 relative">
+                {heroImageUri ? (
+                  <Image
+                    source={{ uri: heroImageUri }}
+                    className="w-full h-full"
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <View className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 items-center justify-center">
+                    <View className="w-24 h-24 bg-white/20 rounded-3xl items-center justify-center mb-4">
+                      <Ionicons
+                        name="barbell-outline"
+                        size={40}
+                        color="white"
+                      />
+                    </View>
+                    <Text className="text-white text-lg font-semibold">
+                      Exercise Image
+                    </Text>
                   </View>
-                  <Text className="text-white font-bold text-lg">
-                    {aiGuidance
-                      ? "Refresh AI Guidance"
-                      : "Get AI Guidance on Form & Technique"}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
+                )}
 
+                {/* Gradient overlay */}
+                <View className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent" />
+              </View>
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          {/* <View className="mt-8 gap-3">
             <TouchableOpacity
               className="bg-zinc-800 rounded-2xl py-5 items-center border border-zinc-700/50"
               onPress={() => router.back()}
@@ -368,7 +369,7 @@ export default function ExerciseDetails() {
                 <Text className="text-zinc-300 font-bold text-lg">Go Back</Text>
               </View>
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
 
         {/* Bottom Spacing */}

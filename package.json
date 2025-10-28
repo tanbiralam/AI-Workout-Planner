@@ -7,7 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "deploy": "npx expo export -p web && npx eas-cli@latest deploy"
+    "deploy": "npx expo export -p web && npx eas-cli@latest deploy",
+    "sync:exercises": "tsx scripts/sync.ts"
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.14.2",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~19.1.10",
+    "tsx": "^4.20.6",
     "typescript": "~5.9.2"
   },
   "private": true

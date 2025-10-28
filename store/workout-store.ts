@@ -10,7 +10,7 @@ export interface WorkoutSet {
   isCompleted: boolean;
 }
 
-interface WorkoutExercise {
+export interface WorkoutExercise {
   id: string;
   sanityId: string; // Store the Sanity _id
   name: string;

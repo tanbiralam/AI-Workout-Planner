@@ -40,6 +40,8 @@ Create a `.env.local` file in the project root and supply:
 - `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key for Expo.
 - `OPEN_AI_API_KEY` - OpenAI API key used by `/api/ai`.
 - `SANITY_API_TOKEN` - Sanity token with write access for API routes.
+- _(Optional)_ `EXERCISE_DB_API_URL` - Override the Exercise DB base url. Defaults to `https://v2.exercisedb.dev/api/v1/exercises`.
+- _(Optional)_ `EXERCISE_DB_PAGE_SIZE` - Page size for sync pagination (defaults to `100`).
 
 Getting Started
 ---------------
@@ -50,6 +52,7 @@ Getting Started
 
 Additional Notes
 ----------------
+- **Exercise Library Sync:** With the new `npm run sync:exercises` command (Node 18+), you can import or update exercises from Exercise DB into Sanity. The script paginates through the API, upserts documents by `externalId`, and skips any Sanity records where `manualOverride` is enabled. Ensure `SANITY_API_TOKEN` is present before running.
 - NativeWind utility classes drive theming; ensure Metro is configured (already handled in `metro.config.js`).
 - API route handlers assume Expo Router's file-based routing in the `/app/api` directory, keeping secrets off-device.
 - Workout saves require at least one completed set; the UI disables submission until the data is valid, preventing empty records in Sanity.
