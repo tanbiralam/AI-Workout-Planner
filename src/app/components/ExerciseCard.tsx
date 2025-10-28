@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { WorkoutExercise } from "@/store/workout-store";
+import { WorkoutExercise } from "../../../store/workout-store";
 
 interface ExerciseCardProps {
   exercise: WorkoutExercise;

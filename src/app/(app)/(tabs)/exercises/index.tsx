@@ -21,10 +21,17 @@ import Loader from "@/app/components/Loader";
 
 export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
   _id,
+  externalId,
   name,
   description,
   difficulty,
   muscleGroup,
+  bodyParts,
+  targetMuscles,
+  equipments,
+  gifUrl,
+  sourceImageUrl,
+  autoSynced,
   image {
     asset-> {
       _id,
@@ -33,6 +40,7 @@ export const exercisesQuery = defineQuery(`*[_type == "exercise"] {
     alt
   },
   videoUrl,
+  instructions,
   isActive
 }`);
 
