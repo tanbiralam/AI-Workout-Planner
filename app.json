@@ -12,10 +12,12 @@
         {
           "origin": "https://n"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "name": "fit-app",
     "slug": "fit-app",
+    "icon": "./assets/icon.png",
     "extra": {
       "router": {
         "origin": "https://n"
