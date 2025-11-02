@@ -2,7 +2,7 @@
 import { adminClient } from "../src/lib/sanity/client";
 
 const API_BASE_URL =
-  process.env.EXERCISE_DB_API_URL ??
+  process.env.EXPO_PUBLIC_EXERCISE_DB_API_URL ??
   "https://exercise-db-rust.vercel.app/api/v1/exercises";
 const PAGE_SIZE = Number.parseInt(
   process.env.EXERCISE_DB_PAGE_SIZE ?? "100",
@@ -45,9 +45,9 @@ const DEFAULT_DESCRIPTION_FALLBACK =
  */
 
 const ensureEnv = () => {
-  if (!process.env.SANITY_API_TOKEN) {
+  if (!process.env.EXPO_PUBLIC_SANITY_API_TOKEN) {
     throw new Error(
-      "Missing SANITY_API_TOKEN. Please set it before running the sync script."
+      "Missing EXPO_PUBLIC_SANITY_API_TOKEN. Please set it before running the sync script."
     );
   }
 };
@@ -125,12 +125,12 @@ const toTitleCase = (value) =>
         )
         .join("")
         .trim()
-    : value
+    : value;
 
 const formatStringArray = (values) =>
   (values ?? [])
     .map((entry) => toTitleCase(entry?.trim()))
-    .filter((entry) => Boolean(entry))
+    .filter((entry) => Boolean(entry));
 
 /**
  * @param {ExerciseApiRecord} record
