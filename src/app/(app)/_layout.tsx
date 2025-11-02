@@ -7,13 +7,6 @@ function Layout() {
   const { isLoaded, isSignedIn, userId, sessionId, getToken } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
 
-  // Show splash screen while auth is loading
-  if (!isLoaded) {
-    return (
-      <SplashScreen onFinish={() => setShowSplash(false)} duration={2500} />
-    );
-  }
-
   // Always call useEffect first - conditionally set up timer
   useEffect(() => {
     if (isLoaded && showSplash) {
@@ -23,6 +16,13 @@ function Layout() {
       return () => clearTimeout(timer);
     }
   }, [isLoaded, showSplash]);
+
+  // Show splash screen while auth is loading
+  if (!isLoaded) {
+    return (
+      <SplashScreen onFinish={() => setShowSplash(false)} duration={2500} />
+    );
+  }
 
   // Show brief brand splash then proceed to app
   if (showSplash && isLoaded) {
