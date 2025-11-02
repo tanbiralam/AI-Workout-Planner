@@ -1,15 +1,33 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { Stack } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { useEffect, useState } from "react";
+import SplashScreen from "@/app/components/SplashScreen";
 
 function Layout() {
   const { isLoaded, isSignedIn, userId, sessionId, getToken } = useAuth();
+  const [showSplash, setShowSplash] = useState(true);
 
+  // Show splash screen while auth is loading
   if (!isLoaded) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+      <SplashScreen onFinish={() => setShowSplash(false)} duration={2500} />
+    );
+  }
+
+  // Always call useEffect first - conditionally set up timer
+  useEffect(() => {
+    if (isLoaded && showSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded, showSplash]);
+
+  // Show brief brand splash then proceed to app
+  if (showSplash && isLoaded) {
+    return (
+      <SplashScreen onFinish={() => setShowSplash(false)} duration={2000} />
     );
   }
 

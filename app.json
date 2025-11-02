@@ -13,11 +13,17 @@
           "origin": "https://n"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-splash-screen"
     ],
     "name": "fit-app",
     "slug": "fit-app",
     "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D0D0D"
+    },
     "extra": {
       "router": {
         "origin": "https://n"
