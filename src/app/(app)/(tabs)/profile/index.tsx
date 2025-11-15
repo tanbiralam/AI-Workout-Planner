@@ -4,8 +4,8 @@ import { formatDuration } from "@/lib/utils";
 import { calculateStats } from "@/lib/workoutUtils";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   ScrollView,
@@ -19,6 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
   const { signOut } = useAuth();
+  const router = useRouter()
   const { user } = useUser();
 
   const { workouts, loading, refreshing, fetchWorkouts, setRefreshing } =
@@ -190,6 +191,11 @@ export default function ProfilePage() {
             <TouchableOpacity
               className="flex-row items-center justify-between p-4 border-b border-zinc-800/50"
               activeOpacity={0.7}
+              onPress={() => {
+                router.push({
+                  pathname:"/profile/editProfile"
+                })
+              }}
             >
               <View className="flex-row items-center flex-1">
                 <View className="w-10 h-10 bg-blue-500/15 rounded-xl items-center justify-center mr-3">
