@@ -326,13 +326,14 @@ const EditProfile = () => {
         </View>
 
         {/* Profile Picture Section */}
-        <View className="px-5 mb-8">
-          <View className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800/50">
-            <Text className="text-lg font-bold text-white mb-4">
+        <View className="px-5 mb-10">
+          <View className="bg-zinc-900 rounded-3xl p-7 border border-zinc-800/50">
+            <Text className="text-lg font-bold text-white mb-6">
               Profile Picture
             </Text>
 
             <View className="items-center">
+              {/* Image + Camera Button */}
               <View className="relative">
                 <Image
                   source={{
@@ -341,26 +342,28 @@ const EditProfile = () => {
                       user?.externalAccounts?.[0]?.imageUrl ||
                       "",
                   }}
-                  style={{ width: 100, height: 100, borderRadius: 50 }}
+                  style={{ width: 120, height: 120, borderRadius: 60 }}
                 />
+
                 <TouchableOpacity
                   onPress={showImagePickerOptions}
-                  className="absolute -bottom-2 -right-2 w-12 h-12 bg-blue-600 rounded-full items-center justify-center shadow-lg"
+                  className="absolute -bottom-3 -right-3 w-14 h-14 bg-blue-600 rounded-full items-center justify-center shadow-lg border border-zinc-900"
                   activeOpacity={0.8}
                   disabled={isUploadingImage}
                 >
                   {isUploadingImage ? (
                     <ActivityIndicator size="small" color="white" />
                   ) : (
-                    <Ionicons name="camera" size={20} color="white" />
+                    <Ionicons name="camera" size={22} color="white" />
                   )}
                 </TouchableOpacity>
               </View>
 
-              <View className="mt-4 space-y-2">
+              {/* Buttons & Labels */}
+              <View className="mt-6 space-y-3 items-center">
                 <TouchableOpacity
                   onPress={showImagePickerOptions}
-                  className="bg-zinc-800 rounded-2xl px-6 py-3"
+                  className="bg-zinc-800 rounded-2xl px-6 py-3.5 w-48"
                   activeOpacity={0.7}
                   disabled={isUploadingImage}
                 >
@@ -369,12 +372,12 @@ const EditProfile = () => {
                   </Text>
                 </TouchableOpacity>
 
-                <Text className="text-zinc-500 text-xs text-center">
-                  Tap the camera icon to update your profile picture
+                <Text className="text-zinc-500 text-xs text-center px-6">
+                  Tap the camera icon or choose from your photo library
                 </Text>
 
-                <Text className="text-zinc-600 text-xs text-center px-4">
-                  Choose from your photo library or take a new photo
+                <Text className="text-zinc-600 text-xs text-center px-8 leading-5">
+                  A clear photo helps personalize your profile.
                 </Text>
               </View>
             </View>
@@ -382,27 +385,28 @@ const EditProfile = () => {
         </View>
 
         {/* Personal Information */}
-        <View className="px-5 mb-8">
-          <View className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800/50">
-            <Text className="text-lg font-bold text-white mb-5">
+
+        <View className="px-5 mb-10">
+          <View className="bg-zinc-900 rounded-3xl p-7 border border-zinc-800/50">
+            <Text className="text-lg font-bold text-white mb-6">
               Personal Information
             </Text>
 
-            <View className="space-y-5">
+            <View className="space-y-6">
               {/* First Name */}
               <View>
-                <Text className="text-zinc-400 text-sm font-medium mb-2">
+                <Text className="text-zinc-400 text-sm font-medium mb-2 ml-1">
                   First Name
                 </Text>
-                <View className="bg-black/40 border border-zinc-800 rounded-xl overflow-hidden">
-                  <View className="flex-row items-center px-4 py-3.5">
-                    <Ionicons name="person-outline" size={20} color="#71717a" />
+                <View className="bg-black/40 border border-zinc-800 rounded-xl">
+                  <View className="flex-row items-center px-5 py-4">
+                    <Ionicons name="person-outline" size={22} color="#71717a" />
                     <TextInput
                       value={firstName}
                       onChangeText={setFirstName}
                       placeholder="Enter your first name"
                       placeholderTextColor="#52525b"
-                      className="flex-1 ml-3 text-white text-base"
+                      className="flex-1 ml-4 text-white text-base"
                       editable={!isUpdating}
                     />
                   </View>
@@ -411,18 +415,18 @@ const EditProfile = () => {
 
               {/* Last Name */}
               <View>
-                <Text className="text-zinc-400 text-sm font-medium mb-2">
+                <Text className="text-zinc-400 text-sm font-medium mb-2 ml-1">
                   Last Name
                 </Text>
-                <View className="bg-black/40 border border-zinc-800 rounded-xl overflow-hidden">
-                  <View className="flex-row items-center px-4 py-3.5">
-                    <Ionicons name="person-outline" size={20} color="#71717a" />
+                <View className="bg-black/40 border border-zinc-800 rounded-xl">
+                  <View className="flex-row items-center px-5 py-4">
+                    <Ionicons name="person-outline" size={22} color="#71717a" />
                     <TextInput
                       value={lastName}
                       onChangeText={setLastName}
                       placeholder="Enter your last name"
                       placeholderTextColor="#52525b"
-                      className="flex-1 ml-3 text-white text-base"
+                      className="flex-1 ml-4 text-white text-base"
                       editable={!isUpdating}
                     />
                   </View>
@@ -431,18 +435,19 @@ const EditProfile = () => {
 
               {/* Email (Read-only) */}
               <View>
-                <Text className="text-zinc-400 text-sm font-medium mb-2">
+                <Text className="text-zinc-400 text-sm font-medium mb-2 ml-1">
                   Email
                 </Text>
-                <View className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl overflow-hidden">
-                  <View className="flex-row items-center px-4 py-3.5">
-                    <Ionicons name="mail-outline" size={20} color="#71717a" />
-                    <Text className="flex-1 ml-3 text-zinc-400 text-base">
+                <View className="bg-zinc-800/50 border border-zinc-700/50 rounded-xl">
+                  <View className="flex-row items-center px-5 py-4">
+                    <Ionicons name="mail-outline" size={22} color="#71717a" />
+                    <Text className="flex-1 ml-4 text-zinc-400 text-base">
                       {user?.emailAddresses?.[0]?.emailAddress}
                     </Text>
                   </View>
                 </View>
-                <Text className="text-zinc-600 text-xs mt-1">
+
+                <Text className="text-zinc-600 text-xs mt-2 ml-1">
                   Email cannot be changed here. Contact support if needed.
                 </Text>
               </View>
@@ -451,20 +456,21 @@ const EditProfile = () => {
         </View>
 
         {/* Account Information */}
-        <View className="px-5 mb-8">
-          <View className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800/50">
-            <Text className="text-lg font-bold text-white mb-4">
+
+        <View className="px-5 mb-10">
+          <View className="bg-zinc-900 rounded-3xl p-7 border border-zinc-800/50">
+            <Text className="text-lg font-bold text-white mb-6">
               Account Information
             </Text>
 
-            <View className="space-y-4">
+            <View className="space-y-6">
               {/* Member Since */}
-              <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center justify-between pb-1">
                 <View className="flex-row items-center">
-                  <View className="w-10 h-10 bg-blue-500/15 rounded-xl items-center justify-center mr-3">
+                  <View className="w-11 h-11 bg-blue-500/15 rounded-xl items-center justify-center mr-4">
                     <Ionicons
                       name="calendar-outline"
-                      size={20}
+                      size={22}
                       color="#3b82f6"
                     />
                   </View>
@@ -480,12 +486,12 @@ const EditProfile = () => {
               </View>
 
               {/* User ID */}
-              <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center justify-between pb-1">
                 <View className="flex-row items-center">
-                  <View className="w-10 h-10 bg-purple-500/15 rounded-xl items-center justify-center mr-3">
+                  <View className="w-11 h-11 bg-purple-500/15 rounded-xl items-center justify-center mr-4">
                     <Ionicons
                       name="id-card-outline"
-                      size={20}
+                      size={22}
                       color="#a855f7"
                     />
                   </View>
@@ -499,12 +505,12 @@ const EditProfile = () => {
               </View>
 
               {/* Account Status */}
-              <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center justify-between pb-1">
                 <View className="flex-row items-center">
-                  <View className="w-10 h-10 bg-green-500/15 rounded-xl items-center justify-center mr-3">
+                  <View className="w-11 h-11 bg-green-500/15 rounded-xl items-center justify-center mr-4">
                     <Ionicons
                       name="shield-checkmark-outline"
-                      size={20}
+                      size={22}
                       color="#22c55e"
                     />
                   </View>
