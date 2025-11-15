@@ -1,10 +1,11 @@
+import React, { useEffect } from "react";
 import Loader from "@/app/components/Loader";
 import { useWorkouts } from "@/hooks/useWorkout";
 import { formatDuration } from "@/lib/utils";
 import { calculateStats } from "@/lib/workoutUtils";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import {
   Alert,
   Image,
@@ -19,11 +20,24 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
   const { signOut } = useAuth();
-  const router = useRouter()
+  const router = useRouter();
   const { user } = useUser();
 
   const { workouts, loading, refreshing, fetchWorkouts, setRefreshing } =
     useWorkouts(user?.id);
+
+  // Force refresh key to trigger re-renders for profile updates
+  const [profileUpdateKey, setProfileUpdateKey] = React.useState(0);
+
+  // Refresh user data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        // Force a re-render to pick up profile photo changes
+        setProfileUpdateKey((prev) => prev + 1);
+      }
+    }, [user])
+  );
 
   const { totalWorkouts, totalDuration, averageDuration } =
     calculateStats(workouts);
@@ -89,6 +103,7 @@ export default function ProfilePage() {
             <View className="flex-row items-center">
               <View className="relative mr-4">
                 <Image
+                  key={`profile-image-${profileUpdateKey}`}
                   source={{
                     uri: user.externalAccounts[0]?.imageUrl ?? user?.imageUrl,
                   }}
@@ -193,8 +208,8 @@ export default function ProfilePage() {
               activeOpacity={0.7}
               onPress={() => {
                 router.push({
-                  pathname:"/profile/editProfile"
-                })
+                  pathname: "/profile/editProfile",
+                });
               }}
             >
               <View className="flex-row items-center flex-1">
