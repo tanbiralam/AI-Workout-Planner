@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,29 +21,46 @@ const EditProfile = () => {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [originalFirstName, setOriginalFirstName] = useState("");
+  const [originalLastName, setOriginalLastName] = useState("");
 
-  React.useEffect(() => {
-    if (user?.firstName !== firstName || user?.lastName !== lastName) {
+  // Initialize form data when user is loaded
+  useEffect(() => {
+    if (user && isLoaded) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      setOriginalFirstName(user.firstName || "");
+      setOriginalLastName(user.lastName || "");
+    }
+  }, [user, isLoaded]);
+
+  useEffect(() => {
+    if (originalFirstName !== firstName || originalLastName !== lastName) {
       setHasChanges(true);
     } else {
       setHasChanges(false);
     }
-  }, [firstName, lastName, user]);
+  }, [firstName, lastName, originalFirstName, originalLastName]);
 
   const handleSave = async () => {
     if (!isLoaded || !user) return;
 
     setIsUpdating(true);
     try {
+      // Use Clerk's camelCase parameters
       await user.update({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
       });
+
+      // Update local state to reflect the saved changes
+      setOriginalFirstName(firstName.trim());
+      setOriginalLastName(lastName.trim());
 
       Alert.alert("Success", "Profile updated successfully!", [
         {
@@ -99,7 +116,7 @@ const EditProfile = () => {
         return;
       }
 
-      // Launch image picker
+      // Launch image picker with correct media type
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -108,8 +125,6 @@ const EditProfile = () => {
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        // For Clerk profile image updates in this SDK version,
-        // we'll need to implement a proper upload mechanism
         await processImageUpload(result.assets[0].uri);
       }
     } catch (error) {
@@ -139,8 +154,9 @@ const EditProfile = () => {
         return;
       }
 
-      // Launch camera
+      // Launch camera with correct media type
       const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -158,12 +174,10 @@ const EditProfile = () => {
   const processImageUpload = async (imageUri: string) => {
     setIsUploadingImage(true);
     try {
-      // In a real implementation, you would:
-      // 1. Upload the image to a secure storage (like Clerk's CDN)
-      // 2. Get the secure URL
-      // 3. Update the user profile with that URL
+      // For Clerk profile image updates, we need to handle this differently
+      // since the current SDK version doesn't support direct imageUrl updates
+      // In production, you would implement proper image upload to Clerk's CDN
 
-      // For now, we'll show a success message and provide guidance
       Alert.alert(
         "Profile Picture Update",
         "Image selected successfully! In a production environment, this would upload to secure storage and update your profile picture.",
@@ -171,12 +185,9 @@ const EditProfile = () => {
           {
             text: "Continue",
             onPress: () => {
-              // You could implement Clerk's setProfileImage method here
-              // or use Clerk's upload API if available in your version
               console.log("Selected image URI:", imageUri);
-
-              // For Clerk SDK versions that support it:
-              // await user.setProfileImage({ file: imageUri });
+              // Here you would implement the actual image upload logic
+              // For Clerk, you might need to use their backend API directly
             },
           },
         ]
