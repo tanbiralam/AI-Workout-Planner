@@ -256,6 +256,9 @@ export default function ActiveWorkout() {
       // Save to Sanity via API
       const result = await fetch("/api/save-workout", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ workoutData }),
       });
 

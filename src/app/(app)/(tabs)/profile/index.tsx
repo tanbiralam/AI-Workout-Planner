@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import Loader from "@/app/components/Loader";
+import WorkoutHeatmap from "@/app/components/WorkoutHeatmap";
 import { useWorkouts } from "@/hooks/useWorkout";
 import { formatDuration } from "@/lib/utils";
 import { calculateStats } from "@/lib/workoutUtils";
@@ -193,6 +194,11 @@ export default function ProfilePage() {
               </View>
             )}
           </View>
+        </View>
+
+        {/* Workout Consistency Heatmap */}
+        <View className="px-5 mb-5">
+          <WorkoutHeatmap userId={user?.id} />
         </View>
 
         {/* Account Settings */}
