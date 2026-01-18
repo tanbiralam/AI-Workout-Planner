@@ -12,6 +12,10 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_b3B0aW1hbC1ncml6emx5LTEyLmNsZXJrLmFjY291bnRzLmRldiQ",
+        "EXPO_PUBLIC_SANITY_API_TOKEN": "skwcmd8DSKUulvezltAfjaVb9GIGWtMzd7iOEioFBgwxPcHPfRDrDCsHh0JOYvi1WFyoolws79GgHQg6xQ0YP2rrUXr4TbgzMj3OpJmXDQ76q00x1spe7ozsliawyDmV35I0ksUfLCKdDWvoLihF1M575T5UCxUTRktUtiKSKerfAS2Dpq82"
       }
     },
     "production": {
