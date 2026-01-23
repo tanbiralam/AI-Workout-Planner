@@ -16,8 +16,11 @@ export const client = createClient(config);
 
 const adminConfig = {
   ...config,
-  token: process.env.EXPO_PUBLIC_SANITY_API_TOKEN,
+  token:
+    process.env.SANITY_API_TOKEN || process.env.EXPO_PUBLIC_SANITY_API_TOKEN,
 };
+
+console.log("Token loaded:", !!adminConfig.token);
 
 export const adminClient = createClient(adminConfig);
 
