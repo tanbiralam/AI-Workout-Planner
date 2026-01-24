@@ -22,7 +22,7 @@ import SetRow from "@/app/components/SetRow";
 import WorkoutHeader from "@/app/components/WorkoutHeader";
 import TimerDisplay from "@/app/components/TimerDisplay";
 import { defineQuery } from "groq";
-import { client } from "@/lib/sanity/client";
+import { client, adminClient } from "@/lib/sanity/client";
 import { useUser } from "@clerk/clerk-expo";
 import { WorkoutData } from "@/app/api/save-workout+api";
 import { getWorkoutDuration } from "@/lib/workoutUtils";
@@ -253,23 +253,10 @@ export default function ActiveWorkout() {
         exercises: validExercises,
       };
 
-      // Save to Sanity via API
-      const result = await fetch("/api/save-workout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ workoutData }),
-      });
+      // Save to Sanity directly using admin client
+      const result = await adminClient.create(workoutData);
 
       console.log("Workout saved successfully:", result);
-      // Check if the response is successful
-      if (!result.ok) {
-        throw new Error(`HTTP error! status: ${result.status}`);
-      }
-
-      const responseData = await result.json();
-      console.log("Workout saved successfully:", responseData);
 
       return true;
     } catch (error) {

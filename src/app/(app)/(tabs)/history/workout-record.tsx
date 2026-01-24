@@ -10,7 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { defineQuery } from "groq";
-import { client } from "@/lib/sanity/client";
+import { client, adminClient } from "@/lib/sanity/client";
 import { GetWorkoutRecordQueryResult } from "@/lib/sanity/types";
 import { formatDuration } from "@/lib/utils";
 import { getTotalSets } from "@/lib/workoutUtils";
@@ -180,10 +180,8 @@ export default function WorkoutRecord() {
     setDeleting(true);
 
     try {
-      await fetch("/api/delete-workout", {
-        method: "POST",
-        body: JSON.stringify({ workoutId }),
-      });
+      // Delete directly using admin client
+      await adminClient.delete(workoutId as string);
 
       router.replace("/(app)/(tabs)/history?refresh=true");
     } catch (error) {
