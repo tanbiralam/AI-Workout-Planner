@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback, useMemo } from "react";
+import React, { memo, useState, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -203,6 +203,7 @@ export function WorkoutHeatmap({ userId }: WorkoutHeatmapProps) {
 
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState({ dateKey: "", count: 0 });
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const handleCellPress = useCallback((dateKey: string, count: number) => {
     setSelectedDate({ dateKey, count });
@@ -251,6 +252,7 @@ export function WorkoutHeatmap({ userId }: WorkoutHeatmapProps) {
       ) : (
         // Heatmap grid
         <ScrollView
+          ref={scrollViewRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingRight: 16 }}

@@ -47,10 +47,10 @@ export function useWorkoutHeatmap(userId?: string): HeatmapData {
   // Pre-compute the 365-day array once
   const days = useMemo(() => generateLast365Days(), []);
 
-  // Calculate start date for query (365 days ago)
+  // Calculate start date for query (January 1st of current year)
   const startDate = useMemo(() => {
-    const date = new Date();
-    date.setDate(date.getDate() - 365);
+    const currentYear = new Date().getFullYear();
+    const date = new Date(currentYear, 0, 1); // January 1st
     date.setHours(0, 0, 0, 0);
     return date.toISOString();
   }, []);

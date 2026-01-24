@@ -6,21 +6,33 @@ import { GetWorkoutsQueryResult } from "@/lib/sanity/types";
 export const MAX_WORKOUTS_PER_DAY = 5;
 
 /**
- * Generates an array of the last 365 days as YYYY-MM-DD strings
- * Pre-computed for performance - call once and reuse
+ * Generates an array of all days in the current calendar year as YYYY-MM-DD strings
+ * Shows Jan 1 → Dec 31 of the current year
  */
-export function generateLast365Days(): string[] {
+export function generateCurrentYearDays(): string[] {
   const days: string[] = [];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const currentYear = new Date().getFullYear();
 
-  for (let i = 364; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    days.push(formatDateKey(date));
+  // Start from January 1st of current year
+  const startDate = new Date(currentYear, 0, 1); // Month is 0-indexed
+  // End at December 31st of current year
+  const endDate = new Date(currentYear, 11, 31);
+
+  const current = new Date(startDate);
+  while (current <= endDate) {
+    days.push(formatDateKey(current));
+    current.setDate(current.getDate() + 1);
   }
 
   return days;
+}
+
+/**
+ * @deprecated Use generateCurrentYearDays instead
+ * Generates an array of the last 365 days as YYYY-MM-DD strings
+ */
+export function generateLast365Days(): string[] {
+  return generateCurrentYearDays();
 }
 
 /**
