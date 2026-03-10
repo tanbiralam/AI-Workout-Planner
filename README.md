@@ -285,12 +285,6 @@ graph TB
 
 ## 📄 License
 
-This project is private. Contact the repository owner for licensing details.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
-
-<div align="center">
-
-**Built with ❤️ using React Native and Sanity**
-
-</div>
