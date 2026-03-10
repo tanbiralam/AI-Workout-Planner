@@ -74,7 +74,7 @@ export default function SplashScreen({
 
           {/* App Name */}
           <Text className="text-3xl font-bold text-white mb-2 text-center">
-            FitApp
+            FitTracker
           </Text>
 
           {/* Tagline */}
