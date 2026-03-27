@@ -13,7 +13,11 @@ import { defineQuery } from "groq";
 import { client, adminClient } from "@/lib/sanity/client";
 import { GetWorkoutRecordQueryResult } from "@/lib/sanity/types";
 import { formatDuration } from "@/lib/utils";
-import { getTotalSets } from "@/lib/workoutUtils";
+import {
+  getTotalSets,
+  formatWorkoutLongDate,
+  formatWorkoutTime,
+} from "@/lib/workoutUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Loader from "@/app/components/Loader";
@@ -70,37 +74,6 @@ export default function WorkoutRecord() {
 
     fetchWorkout();
   }, [workoutId]);
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Unknown Date";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const formatTime = (dateString?: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  const formatWorkoutDuration = (seconds?: number) => {
-    if (!seconds) return "Duration not recorded";
-    return formatDuration(seconds);
-  };
-
-  const getTotalSetsCount = () => {
-    if (!workout) return 0;
-    return getTotalSets(workout);
-  };
 
   const getTotalVolume = () => {
     let totalVolume = 0;
@@ -232,7 +205,8 @@ export default function WorkoutRecord() {
             Workout Details
           </Text>
           <Text className="text-sm text-zinc-500 mt-1">
-            {formatDate(workout.date)} at {formatTime(workout.date)}
+            {formatWorkoutLongDate(workout.date)} at{" "}
+            {formatWorkoutTime(workout.date)}
           </Text>
           <View className="mt-3 w-12 h-1 bg-blue-500 rounded-full" />
         </View>
@@ -251,7 +225,9 @@ export default function WorkoutRecord() {
                   <Ionicons name="timer-outline" size={18} color="#3b82f6" />
                 </View>
                 <Text className="text-2xl font-bold text-white mb-1">
-                  {formatWorkoutDuration(workout.duration)}
+                  {workout.duration
+                    ? formatDuration(workout.duration)
+                    : "Duration not recorded"}
                 </Text>
                 <Text className="text-xs text-zinc-500">Duration</Text>
               </View>
@@ -275,7 +251,7 @@ export default function WorkoutRecord() {
                   />
                 </View>
                 <Text className="text-2xl font-bold text-white mb-1">
-                  {getTotalSetsCount()}
+                  {workout ? getTotalSets(workout) : 0}
                 </Text>
                 <Text className="text-xs text-zinc-500">Total Sets</Text>
               </View>

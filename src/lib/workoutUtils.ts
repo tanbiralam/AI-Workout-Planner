@@ -56,6 +56,34 @@ export function formatWorkoutDate(dateString?: string): string {
 }
 
 /**
+ * Returns a full long-form date string: "Wednesday, March 5, 2025"
+ * Used in workout detail screens where more context is needed.
+ */
+export function formatWorkoutLongDate(dateString?: string): string {
+  if (!dateString) return "Unknown Date";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+/**
+ * Returns a time string: "9:30 AM"
+ * Used alongside formatWorkoutLongDate in workout detail screens.
+ */
+export function formatWorkoutTime(dateString?: string): string {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+
+/**
  * Formats workout duration from stopwatch values (hours, minutes, seconds)
  * Shows HH:MM:SS format for workouts over 1 hour, MM:SS otherwise
  */

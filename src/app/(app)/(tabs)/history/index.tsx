@@ -4,8 +4,8 @@ import { getTotalSets, formatWorkoutDate } from "@/lib/workoutUtils";
 import { GetWorkoutsQueryResult } from "@/lib/sanity/types";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -26,6 +26,13 @@ export default function HistoryPage() {
   const { workouts, loading, refreshing, fetchWorkouts, setRefreshing } =
     useWorkouts(user?.id);
 
+  // Refresh list whenever the History tab comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchWorkouts();
+    }, [user?.id])
+  );
+
   // Handle refresh parameter from deleted workout
   useEffect(() => {
     if (refresh === "true") {
@@ -38,11 +45,6 @@ export default function HistoryPage() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchWorkouts();
-  };
-
-  const formatWorkoutDuration = (seconds: number) => {
-    if (!seconds) return "Duration not recorded";
-    return formatDuration(seconds);
   };
 
   const getExerciseNames = (workout: GetWorkoutsQueryResult[number]) => {
@@ -135,7 +137,9 @@ export default function HistoryPage() {
                             color="#3b82f6"
                           />
                           <Text className="text-xs text-zinc-400 ml-1">
-                            {formatWorkoutDuration(workout.duration)}
+                            {workout.duration
+                              ? formatDuration(workout.duration)
+                              : "Duration not recorded"}
                           </Text>
                         </View>
                       </View>

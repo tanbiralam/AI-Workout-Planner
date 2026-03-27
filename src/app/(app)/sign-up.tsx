@@ -20,6 +20,7 @@ import GoogleSignIn from "../components/GoogleSignIn";
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isResending, setIsResending] = React.useState(false);
 
   const router = useRouter();
 
@@ -37,8 +38,6 @@ export default function SignUpScreen() {
 
     setIsLoading(true);
 
-    console.log(emailAddress, password);
-
     try {
       await signUp.create({
         emailAddress,
@@ -48,10 +47,33 @@ export default function SignUpScreen() {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
       setPendingVerification(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
+      const message =
+        err?.errors?.[0]?.longMessage ||
+        err?.errors?.[0]?.message ||
+        "An error occurred. Please try again.";
+      Alert.alert("Sign Up Failed", message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const onResendPress = async () => {
+    if (!isLoaded || isResending) return;
+    setIsResending(true);
+    try {
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      Alert.alert("Code Sent", `A new verification code has been sent to ${emailAddress}.`);
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+      const message =
+        err?.errors?.[0]?.longMessage ||
+        err?.errors?.[0]?.message ||
+        "Failed to resend code. Please try again.";
+      Alert.alert("Resend Failed", message);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -76,8 +98,13 @@ export default function SignUpScreen() {
       } else {
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
+      const message =
+        err?.errors?.[0]?.longMessage ||
+        err?.errors?.[0]?.message ||
+        "Verification failed. Please check the code and try again.";
+      Alert.alert("Verification Failed", message);
     } finally {
       setIsLoading(false);
     }
@@ -201,9 +228,14 @@ export default function SignUpScreen() {
                   </LinearGradient>
                 </TouchableOpacity>
 
-                <TouchableOpacity className="mt-5" activeOpacity={0.7}>
+                <TouchableOpacity
+                  className="mt-5"
+                  activeOpacity={0.7}
+                  onPress={onResendPress}
+                  disabled={isResending}
+                >
                   <Text className="text-blue-400 font-medium text-center text-sm">
-                    Didn't receive the code? Resend
+                    {isResending ? "Sending..." : "Didn't receive the code? Resend"}
                   </Text>
                 </TouchableOpacity>
               </View>
