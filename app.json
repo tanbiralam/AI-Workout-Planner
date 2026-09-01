@@ -9,18 +9,21 @@
     "plugins": [
       "expo-router",
       "expo-web-browser",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#0D0D0D"
+        }
+      ],
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-status-bar"
     ],
     "name": "fit-app",
     "slug": "fit-app",
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0D0D0D"
-    },
     "extra": {
       "eas": {
         "projectId": "2e8d2bc4-f641-47d8-a794-4c68981e542d"
