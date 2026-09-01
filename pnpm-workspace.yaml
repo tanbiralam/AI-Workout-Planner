@@ -6,3 +6,8 @@ allowBuilds:
   core-js: true
   esbuild: true
   utf-8-validate: true
+minimumReleaseAgeExclude:
+  - expo-modules-core@55.0.26
+  - expo@55.0.31
+  - expo-dev-client@55.0.40
+  - expo-dev-launcher@55.0.41

@@ -6,7 +6,13 @@
     "web": {
       "output": "single"
     },
-    "plugins": ["expo-router", "expo-web-browser", "expo-splash-screen"],
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-splash-screen",
+      "expo-font",
+      "expo-secure-store"
+    ],
     "name": "fit-app",
     "slug": "fit-app",
     "icon": "./assets/icon.png",
